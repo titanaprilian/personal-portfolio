@@ -32,7 +32,7 @@
                 <span class="text-xs px-2 py-0.5 rounded font-display
                              bg-[--color-neon]/10 border border-[--color-neon]/40
                              text-[--color-neon]">
-                    ★ Slot {{ $project->featured_order }}
+                    ★ Featured
                 </span>
             </div>
         @endif
