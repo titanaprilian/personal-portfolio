@@ -100,7 +100,7 @@
       @if($project->featured_order)
         <span class="px-2 py-0.5 rounded border border-[--color-neon]/30
                      text-[--color-neon] bg-[--color-neon]/5">
-          ★ Featured (Slot {{ $project->featured_order }})
+          ★ Featured
         </span>
         <span class="text-[--color-border]">·</span>
       @endif
