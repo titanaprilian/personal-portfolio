@@ -234,9 +234,9 @@
                                         {{ $tag->name }}
                                     </span>
                                 @endforeach
-                                @if($project->featured)
+                                @if($project->featured_order)
                                     <span class="text-xs px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
-                                        ★ Featured
+                                        ★ Slot {{ $project->featured_order }}
                                     </span>
                                 @endif
                             </div>

@@ -97,10 +97,10 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-3 text-xs text-[--color-muted] font-display">
-      @if($project->featured)
+      @if($project->featured_order)
         <span class="px-2 py-0.5 rounded border border-[--color-neon]/30
                      text-[--color-neon] bg-[--color-neon]/5">
-          ★ Featured Project
+          ★ Featured (Slot {{ $project->featured_order }})
         </span>
         <span class="text-[--color-border]">·</span>
       @endif

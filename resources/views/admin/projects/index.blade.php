@@ -74,10 +74,10 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-3">
-                                    @if($project->featured)
-                                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                        </svg>
+                                    @if($project->featured_order)
+                                        <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
+                                            Slot {{ $project->featured_order }}
+                                        </span>
                                     @else
                                         <span class="text-gray-400">—</span>
                                     @endif
@@ -120,8 +120,8 @@
                         <div class="p-4">
                             <div class="flex items-center justify-between mb-2">
                                 <h3 class="font-medium text-gray-900 dark:text-gray-100">{{ $project->title }}</h3>
-                                @if($project->featured)
-                                    <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">Featured</span>
+                                @if($project->featured_order)
+                                    <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">Slot {{ $project->featured_order }}</span>
                                 @endif
                             </div>
                             <div class="flex flex-wrap gap-1 mb-3">
@@ -276,16 +276,26 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" name="featured" value="1" x-model="editProject.featured"
-                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">Mark as featured</span>
-                                </label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Featured Slot</label>
+                                <select name="featured_order"
+                                    x-model="editProject.featured_order"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option :value="null">None</option>
+                                    <option :value="1">Slot 1 (Primary)</option>
+                                    <option :value="2">Slot 2</option>
+                                    <option :value="3">Slot 3</option>
+                                </select>
+                                <p class="text-xs text-gray-400 mt-1">Max 3 featured projects allowed</p>
                             </div>
-                            <div>
+                            <div x-show="!editProject.featured_order" x-transition>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Order</label>
                                 <input type="number" name="order" x-model="editProject.order" min="0"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                <p class="text-xs text-gray-400 mt-1">Only for unfeatured projects</p>
+                            </div>
+                            <div x-show="editProject.featured_order" x-cloak class="flex items-end">
+                                <p class="text-xs text-gray-400">Order is managed by featured slot</p>
+                                <input type="hidden" name="order" x-model="editProject.order" value="0">
                             </div>
                         </div>
                     </div>

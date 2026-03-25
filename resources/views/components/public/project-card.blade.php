@@ -27,12 +27,12 @@
             </div>
         @endif
 
-        @if($project->featured)
+        @if($project->featured_order)
             <div class="absolute top-3 right-3">
                 <span class="text-xs px-2 py-0.5 rounded font-display
                              bg-[--color-neon]/10 border border-[--color-neon]/40
                              text-[--color-neon]">
-                    ★ Featured
+                    ★ Slot {{ $project->featured_order }}
                 </span>
             </div>
         @endif

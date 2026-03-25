@@ -18,16 +18,21 @@ class Project extends Model
         'thumbnail',
         'demo_url',
         'github_url',
-        'featured',
+        'featured_order',
         'order',
     ];
 
     protected function casts(): array
     {
         return [
-            'featured' => 'boolean',
+            'featured_order' => 'integer',
             'order' => 'integer',
         ];
+    }
+
+    public function scopeFeatured($query)
+    {
+        return $query->whereNotNull('featured_order')->orderBy('featured_order');
     }
 
     public function categories(): BelongsToMany

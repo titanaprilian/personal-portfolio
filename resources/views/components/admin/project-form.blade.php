@@ -9,6 +9,7 @@
     title: '{{ old('title', $project?->title ?? '') }}',
     slug: '{{ old('slug', $project?->slug ?? '') }}',
     description: '{{ old('description', $project?->description ?? '') }}',
+    featuredOrder: {{ old('featured_order', $project?->featured_order ?? '') }},
     selectedCategories: {{ json_encode(old('category_ids', $project?->categories->pluck('id')->toArray() ?? [])) }},
     selectedTags: {{ json_encode(old('tag_ids', $project?->tags->pluck('id')->toArray() ?? [])) }},
 }">
@@ -151,19 +152,31 @@
 
         <div class="grid grid-cols-2 gap-4">
             <div>
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" name="featured" value="1" {{ old('featured', $project?->featured ?? false) ? 'checked' : '' }}
-                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Mark as featured</span>
-                </label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Featured Slot</label>
+                <select name="featured_order" x-model="featuredOrder"
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="">None</option>
+                    <option value="1" {{ old('featured_order', $project?->featured_order ?? '') == 1 ? 'selected' : '' }}>Slot 1 (Primary)</option>
+                    <option value="2" {{ old('featured_order', $project?->featured_order ?? '') == 2 ? 'selected' : '' }}>Slot 2</option>
+                    <option value="3" {{ old('featured_order', $project?->featured_order ?? '') == 3 ? 'selected' : '' }}>Slot 3</option>
+                </select>
+                <p class="text-xs text-gray-400 mt-1">Max 3 featured projects allowed</p>
+                @error('featured_order')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
-            <div>
+            <div x-show="!featuredOrder" x-transition>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Order</label>
                 <input type="number" name="order" value="{{ old('order', $project?->order ?? 0) }}" min="0"
                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                <p class="text-xs text-gray-400 mt-1">Only for unfeatured projects</p>
                 @error('order')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
+            </div>
+            <div x-show="featuredOrder" x-cloak class="flex items-end">
+                <p class="text-xs text-gray-400">Order is managed by featured slot</p>
+                <input type="hidden" name="order" value="0">
             </div>
         </div>
     </div>
