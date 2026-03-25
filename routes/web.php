@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/projects', [ProjectController::class, 'index'])->name('admin.projects.index');
     Route::post('/admin/projects', [ProjectController::class, 'store'])->name('admin.projects.store');
     Route::put('/admin/projects/{project}', [ProjectController::class, 'update'])->name('admin.projects.update');
+    Route::patch('/admin/projects/{project}/order', [ProjectController::class, 'updateOrder'])->name('admin.projects.updateOrder');
     Route::delete('/admin/projects/{project}', [ProjectController::class, 'destroy'])->name('admin.projects.destroy');
 
     Route::get('/admin/blog', [BlogController::class, 'index'])->name('admin.blog.index');
