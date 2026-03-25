@@ -9,7 +9,7 @@
     title: '{{ old('title', $project?->title ?? '') }}',
     slug: '{{ old('slug', $project?->slug ?? '') }}',
     description: '{{ old('description', $project?->description ?? '') }}',
-    featuredOrder: {{ old('featured_order', $project?->featured_order ?? '') }},
+    featuredOrder: {{ json_encode(old('featured_order', $project?->featured_order ?? null)) }},
     selectedCategories: {{ json_encode(old('category_ids', $project?->categories->pluck('id')->toArray() ?? [])) }},
     selectedTags: {{ json_encode(old('tag_ids', $project?->tags->pluck('id')->toArray() ?? [])) }},
 }">
