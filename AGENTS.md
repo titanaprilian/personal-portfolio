@@ -1,3 +1,61 @@
+# AGENTS.md - Developer Guidelines
+
+## Build, Lint & Test Commands
+
+### PHP/Laravel
+- **Run all tests:** `php artisan test --compact`
+- **Run single test file:** `php artisan test --compact tests/Feature/ExampleTest.php`
+- **Run single test by name:** `php artisan test --compact --filter=testName`
+- **Format PHP code:** `vendor/bin/pint --dirty --format agent`
+- **Clear config cache:** `php artisan config:clear`
+
+### Frontend
+- **Build assets:** `npm run build`
+- **Dev server:** `npm run dev`
+
+### Full Stack
+- **Setup project:** `composer run setup`
+- **Run dev environment:** `composer run dev`
+
+## Code Style Guidelines
+
+### PHP
+- Use curly braces for all control structures, even single-line
+- Always use explicit return types and parameter type hints
+- Use PHP 8 constructor property promotion
+- Prefer `public function __construct(public Type $prop) { }`
+- Never use empty `__construct()` unless private
+
+### Naming Conventions
+- Classes: PascalCase (e.g., `UserController`, `ProjectService`)
+- Methods/variables: camelCase (e.g., `getUser()`, `$isActive`)
+- Constants: SCREAMING_SNAKE_CASE
+- Database columns/tables: snake_case
+- Routes: kebab-case
+
+### Imports
+- Use fully qualified class names or proper imports
+- Never use fully qualified names with leading backslash in use statements
+- Group imports: built-in first, then external, then local
+
+### Error Handling
+- Use try/catch for operations that may fail
+- Throw specific exceptions with meaningful messages
+- Use Laravel's `throw` helper in newer code: `throw new \Exception('message')`
+- Always type hint exceptions in catch blocks
+
+### Database
+- Use Eloquent relationships over raw queries
+- Use eager loading to prevent N+1 queries
+- Use query scopes for reusable query logic
+- Casts should be in `casts()` method, not `$casts` property
+
+### Validation
+- Always use Form Request classes
+- Include both rules and custom error messages
+
+---
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
@@ -90,152 +148,55 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 === php rules ===
 
-# PHP
-
-- Always use curly braces for control structures, even for single-line bodies.
-
-## Constructors
-
-- Use PHP 8 constructor property promotion in `__construct()`.
-    - `public function __construct(public GitHub $github) { }`
-- Do not allow empty `__construct()` methods with zero parameters unless the constructor is private.
-
-## Type Declarations
-
-- Always use explicit return type declarations for methods and functions.
-- Use appropriate PHP type hints for method parameters.
-
-<!-- Explicit Return Types and Method Params -->
-```php
-protected function isAccessible(User $user, ?string $path = null): bool
-{
-    ...
-}
-```
-
-## Enums
-
-- Typically, keys in an Enum should be TitleCase. For example: `FavoritePerson`, `BestLake`, `Monthly`.
-
-## Comments
-
-- Prefer PHPDoc blocks over inline comments. Never use comments within the code itself unless the logic is exceptionally complex.
-
-## PHPDoc Blocks
-
-- Add useful array shape type definitions when appropriate.
+- Prefer PHPDoc blocks over inline comments unless logic is exceptionally complex.
+- Enum keys should be TitleCase (e.g., `FavoritePerson`, `Monthly`).
 
 === laravel/core rules ===
 
-# Do Things the Laravel Way
-
-- Use `php artisan make:` commands to create new files (i.e. migrations, controllers, models, etc.). You can list available Artisan commands using the `list-artisan-commands` tool.
-- If you're creating a generic PHP class, use `php artisan make:class`.
-- Pass `--no-interaction` to all Artisan commands to ensure they work without user input. You should also pass the correct `--options` to ensure correct behavior.
-
-## Database
-
-- Always use proper Eloquent relationship methods with return type hints. Prefer relationship methods over raw queries or manual joins.
-- Use Eloquent models and relationships before suggesting raw database queries.
-- Avoid `DB::`; prefer `Model::query()`. Generate code that leverages Laravel's ORM capabilities rather than bypassing them.
-- Generate code that prevents N+1 query problems by using eager loading.
-- Use Laravel's query builder for very complex database operations.
-
-### Model Creation
-
-- When creating new models, create useful factories and seeders for them too. Ask the user if they need any other things, using `list-artisan-commands` to check the available options to `php artisan make:model`.
-
-### APIs & Eloquent Resources
-
-- For APIs, default to using Eloquent API Resources and API versioning unless existing API routes do not, then you should follow existing application convention.
-
-## Controllers & Validation
-
-- Always create Form Request classes for validation rather than inline validation in controllers. Include both validation rules and custom error messages.
-- Check sibling Form Requests to see if the application uses array or string based validation rules.
-
-## Authentication & Authorization
-
-- Use Laravel's built-in authentication and authorization features (gates, policies, Sanctum, etc.).
-
-## URL Generation
-
-- When generating links to other pages, prefer named routes and the `route()` function.
-
-## Queues
-
-- Use queued jobs for time-consuming operations with the `ShouldQueue` interface.
-
-## Configuration
-
-- Use environment variables only in configuration files - never use the `env()` function directly outside of config files. Always use `config('app.name')`, not `env('APP_NAME')`.
-
-## Testing
-
-- When creating models for tests, use the factories for the models. Check if the factory has custom states that can be used before manually setting up the model.
-- Faker: Use methods such as `$this->faker->word()` or `fake()->randomDigit()`. Follow existing conventions whether to use `$this->faker` or `fake()`.
-- When creating tests, make use of `php artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
-
-## Vite Error
-
-- If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
+- Use `php artisan make:` commands to create new files. Pass `--no-interaction`.
+- Use `php artisan make:class` for generic PHP classes.
+- Use `list-artisan-commands` to check available Artisan commands.
+- When creating models, also create factories and seeders.
+- For APIs, default to Eloquent API Resources and API versioning.
+- Use Laravel's built-in auth features (gates, policies, Sanctum).
+- Use `route()` for link generation.
+- Use queued jobs with `ShouldQueue` for time-consuming operations.
+- Use `config()` not `env()` outside config files.
+- Use factories for test models; follow existing `$this->faker` vs `fake()` conventions.
+- Run `php artisan make:test --phpunit {name}` for tests; `--unit` for unit tests.
 
 === laravel/v12 rules ===
 
 # Laravel 12
 
-- CRITICAL: ALWAYS use `search-docs` tool for version-specific Laravel documentation and updated code examples.
+- CRITICAL: ALWAYS use `search-docs` tool for version-specific Laravel documentation.
 - Since Laravel 11, Laravel has a new streamlined file structure which this project uses.
-
-## Laravel 12 Structure
 
 - In Laravel 12, middleware are no longer registered in `app/Http/Kernel.php`.
 - Middleware are configured declaratively in `bootstrap/app.php` using `Application::configure()->withMiddleware()`.
 - `bootstrap/app.php` is the file to register middleware, exceptions, and routing files.
 - `bootstrap/providers.php` contains application specific service providers.
 - The `app\Console\Kernel.php` file no longer exists; use `bootstrap/app.php` or `routes/console.php` for console configuration.
-- Console commands in `app/Console/Commands/` are automatically available and do not require manual registration.
+- Console commands in `app/Console/Commands/` are automatically available.
 
-## Database
-
-- When modifying a column, the migration must include all of the attributes that were previously defined on the column. Otherwise, they will be dropped and lost.
-- Laravel 12 allows limiting eagerly loaded records natively, without external packages: `$query->latest()->limit(10);`.
-
-### Models
-
-- Casts can and likely should be set in a `casts()` method on a model rather than the `$casts` property. Follow existing conventions from other models.
+- When modifying a column, migration must include all attributes. Otherwise they will be dropped.
+- Laravel 12 allows limiting eagerly loaded records: `$query->latest()->limit(10);`.
+- Casts should be in `casts()` method, not `$casts` property.
 
 === pint/core rules ===
 
-# Laravel Pint Code Formatter
-
-- If you have modified any PHP files, you must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
-- Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
+- Run `vendor/bin/pint --dirty --format agent` after modifying PHP files.
 
 === phpunit/core rules ===
 
-# PHPUnit
-
-- This application uses PHPUnit for testing. All tests must be written as PHPUnit classes. Use `php artisan make:test --phpunit {name}` to create a new test.
-- If you see a test using "Pest", convert it to PHPUnit.
-- Every time a test has been updated, run that singular test.
-- When the tests relating to your feature are passing, ask the user if they would like to also run the entire test suite to make sure everything is still passing.
-- Tests should cover all happy paths, failure paths, and edge cases.
-- You must not remove any tests or test files from the tests directory without approval. These are not temporary or helper files; these are core to the application.
-
-## Running Tests
-
-- Run the minimal number of tests, using an appropriate filter, before finalizing.
-- To run all tests: `php artisan test --compact`.
-- To run all tests in a file: `php artisan test --compact tests/Feature/ExampleTest.php`.
-- To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
+- Use PHPUnit classes (not Pest). Run `php artisan make:test --phpunit {name}`.
+- Run singular test after updates, then ask about full suite.
+- Tests must cover happy paths, failure paths, and edge cases.
+- Never remove tests without approval.
 
 === tailwindcss/core rules ===
 
-# Tailwind CSS
-
-- Always use existing Tailwind conventions; check project patterns before adding new ones.
-- IMPORTANT: Always use `search-docs` tool for version-specific Tailwind CSS documentation and updated code examples. Never rely on training data.
-- IMPORTANT: Activate `tailwindcss-development` every time you're working with a Tailwind CSS or styling-related task.
+- Check project patterns before adding new styles.
+- Use `search-docs` tool for Tailwind CSS documentation.
 
 </laravel-boost-guidelines>

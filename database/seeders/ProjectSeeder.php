@@ -14,17 +14,22 @@ class ProjectSeeder extends Seeder
         $categories = ProjectCategory::all();
         $tags = ProjectTag::all();
 
-        Project::factory()->count(10)->create()->each(function (Project $project) use ($categories, $tags) {
+        $orders = range(0, 9);
+        shuffle($orders);
+
+        Project::factory()->count(10)->create()->each(function (Project $project) use ($categories, $tags, &$orders) {
             $project->categories()->attach(
                 $categories->random(fake()->numberBetween(1, 3))->pluck('id')
             );
             $project->tags()->attach(
                 $tags->random(fake()->numberBetween(2, 5))->pluck('id')
             );
+            $project->update(['order' => array_shift($orders)]);
         });
 
-        Project::inRandomOrder()->limit(3)->get()->each(
-            fn (Project $project) => $project->update(['featured' => true])
-        );
+        $featuredProjects = Project::inRandomOrder()->limit(3)->get();
+        foreach ($featuredProjects as $index => $project) {
+            $project->update(['featured_order' => $index + 1]);
+        }
     }
 }

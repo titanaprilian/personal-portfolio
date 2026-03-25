@@ -16,8 +16,7 @@ class HomeController extends Controller
     {
         $featuredProjects = Project::query()
             ->with(['categories', 'tags'])
-            ->where('featured', true)
-            ->orderBy('order')
+            ->featured()
             ->limit(3)
             ->get();
 
