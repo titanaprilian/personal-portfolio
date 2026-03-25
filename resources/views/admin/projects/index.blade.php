@@ -1,9 +1,27 @@
+@php
+    $oldEditProject = null;
+    if ($errors->any() && old('_form') === 'edit') {
+        $oldEditProject = [
+            'id' => old('id'),
+            'title' => old('title'),
+            'slug' => old('slug'),
+            'description' => old('description'),
+            'body' => old('body'),
+            'demo_url' => old('demo_url'),
+            'github_url' => old('github_url'),
+            'featured_order' => old('featured_order') ? (int) old('featured_order') : null,
+            'order' => old('order') ?? 0,
+            'thumbnail' => old('thumbnail'),
+        ];
+    }
+@endphp
+
 <x-layouts.admin title="Projects">
     <div x-data="{
         showCreate: {{ $errors->any() && old('_form') === 'create' ? 'true' : 'false' }},
         showEdit: {{ $errors->any() && old('_form') === 'edit' ? 'true' : 'false' }},
         showDelete: false,
-        editProject: null,
+        editProject: {{ $oldEditProject ? json_encode($oldEditProject) : 'null' }},
         deleteProject: null,
     }">
         @if(session('success'))
@@ -82,7 +100,43 @@
                                         <span class="text-gray-400">—</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $project->order }}</td>
+                                <td class="px-4 py-3">
+                                    <form action="{{ route('admin.projects.updateOrder', $project) }}" method="POST" class="flex items-center gap-1 order-form"
+                                        @submit.prevent="async (e) => {
+                                            const form = e.target;
+                                            const input = form.querySelector('input[name=order]');
+                                            const originalValue = input.value;
+                                            try {
+                                                const response = await fetch(form.action, {
+                                                    method: 'POST',
+                                                    body: new FormData(form),
+                                                    headers: { 'Accept': 'application/json' }
+                                                });
+                                                const data = await response.json();
+                                                if (response.ok) {
+                                                    input.classList.remove('border-red-300', 'dark:border-red-600');
+                                                    input.classList.add('border-green-300', 'dark:border-green-600');
+                                                    setTimeout(() => input.classList.remove('border-green-300', 'dark:border-green-600'), 1500);
+                                                } else {
+                                                    input.value = originalValue;
+                                                    input.classList.add('border-red-300', 'dark:border-red-600');
+                                                    setTimeout(() => input.classList.remove('border-red-300', 'dark:border-red-600'), 2000);
+                                                }
+                                            } catch (err) {
+                                                input.value = originalValue;
+                                            }
+                                        }">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="number" name="order" value="{{ $project->order }}" min="0"
+                                            class="w-16 px-2 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                        <button type="submit" class="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400" title="Update order">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </td>
                                 <td class="px-4 py-3 text-right">
                                     <button @click="showEdit = true; editProject = {{ $project->load(['categories', 'tags'])->toJson() }}"
                                         class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium text-sm mr-3">
@@ -274,29 +328,18 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Featured Slot</label>
-                                <select name="featured_order"
-                                    x-model="editProject.featured_order"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option :value="null">None</option>
-                                    <option :value="1">Slot 1 (Primary)</option>
-                                    <option :value="2">Slot 2</option>
-                                    <option :value="3">Slot 3</option>
-                                </select>
-                                <p class="text-xs text-gray-400 mt-1">Max 3 featured projects allowed</p>
-                            </div>
-                            <div x-show="!editProject.featured_order" x-transition>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Order</label>
-                                <input type="number" name="order" x-model="editProject.order" min="0"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                                <p class="text-xs text-gray-400 mt-1">Only for unfeatured projects</p>
-                            </div>
-                            <div x-show="editProject.featured_order" x-cloak class="flex items-end">
-                                <p class="text-xs text-gray-400">Order is managed by featured slot</p>
-                                <input type="hidden" name="order" x-model="editProject.order" value="0">
-                            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Featured Slot</label>
+                            <select name="featured_order"
+                                x-model="editProject.featured_order"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">None</option>
+                                <option value="1">Slot 1 (Primary)</option>
+                                <option value="2">Slot 2</option>
+                                <option value="3">Slot 3</option>
+                            </select>
+                            <p class="text-xs text-gray-400 mt-1">Max 3 featured projects allowed</p>
+                            <p class="text-xs text-gray-400 mt-1">Use inline order field in the list to reorder unfeatured projects.</p>
                         </div>
                     </div>
 

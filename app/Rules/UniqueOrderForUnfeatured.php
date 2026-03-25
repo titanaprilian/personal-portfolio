@@ -14,21 +14,14 @@ class UniqueOrderForUnfeatured implements ValidationRule
             return;
         }
 
-        $featuredOrder = request()->input('featured_order');
-
-        if ($featuredOrder !== null && $featuredOrder !== '') {
-            return;
-        }
-
         $projectId = request()->route('project')?->id;
 
         $exists = Project::where('order', $value)
-            ->whereNull('featured_order')
             ->when($projectId, fn ($q) => $q->where('id', '!=', $projectId))
             ->exists();
 
         if ($exists) {
-            $fail('This order is already used by another unfeatured project.');
+            $fail('This order is already used by another project.');
         }
     }
 }

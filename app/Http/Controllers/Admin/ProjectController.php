@@ -63,6 +63,31 @@ class ProjectController extends Controller
             ->with('success', 'Project updated successfully.');
     }
 
+    public function updateOrder(Project $project): RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make(request()->all(), [
+            'order' => ['required', 'integer', 'min:0', new \App\Rules\UniqueOrderForUnfeatured],
+        ]);
+
+        if ($validator->fails()) {
+            if (request()->expectsJson()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $order = request()->input('order');
+
+        $project->update(['order' => $order]);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => 'Project order updated.']);
+        }
+
+        return back()->with('success', 'Project order updated.');
+    }
+
     public function destroy(Project $project): RedirectResponse
     {
         if ($project->thumbnail) {
