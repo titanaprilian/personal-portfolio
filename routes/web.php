@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/blog', [BlogController::class, 'index'])->name('admin.blog.index');
     Route::post('/admin/blog', [BlogController::class, 'store'])->name('admin.blog.store');
     Route::put('/admin/blog/{post}', [BlogController::class, 'update'])->name('admin.blog.update');
+    Route::patch('/admin/blog/{post}/order', [BlogController::class, 'updateOrder'])->name('admin.blog.updateOrder');
     Route::delete('/admin/blog/{post}', [BlogController::class, 'destroy'])->name('admin.blog.destroy');
 
     Route::get('/admin/skills', [SkillController::class, 'index'])->name('admin.skills.index');

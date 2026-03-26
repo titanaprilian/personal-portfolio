@@ -30,6 +30,11 @@ class PostFactory extends Factory
 
         $title = array_shift($titles).' ('.$counter++.')';
 
+        static $order = null;
+        if ($order === null) {
+            $order = Post::max('order') ?? -1;
+        }
+
         return [
             'title' => $title,
             'slug' => Str::slug($title),
@@ -38,6 +43,7 @@ class PostFactory extends Factory
             'reading_time' => fake()->numberBetween(3, 15),
             'published_at' => fake()->boolean(80) ? fake()->dateTimeBetween('-1 year', 'now') : null,
             'category_id' => null,
+            'order' => ++$order,
         ];
     }
 
