@@ -40,6 +40,10 @@ class ProjectController extends Controller
             $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails/projects', 'public');
         }
 
+        if (empty($data['order'])) {
+            $data['order'] = Project::getNextOrder();
+        }
+
         $project = Project::create($data);
         $project->categories()->sync($request->input('category_ids', []));
         $project->tags()->sync($request->input('tag_ids', []));
