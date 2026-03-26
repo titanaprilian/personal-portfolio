@@ -45,6 +45,11 @@
                                 class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 Reading Time</th>
                             <th
+                                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider overflow-visible">
+                                <span>Order</span>
+                                <x-admin.tooltip text="Lower numbers appear first in the blog list." />
+                            </th>
+                            <th
                                 class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 Actions</th>
                         </tr>
@@ -105,6 +110,43 @@
                                 </td>
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $post->reading_time }} min
                                     read</td>
+                                <td class="px-4 py-3">
+                                    <form action="{{ route('admin.blog.updateOrder', $post) }}" method="POST" class="flex items-center gap-1 order-form"
+                                        @submit.prevent="async (e) => {
+                                            const form = e.target;
+                                            const input = form.querySelector('input[name=order]');
+                                            const originalValue = input.value;
+                                            try {
+                                                const response = await fetch(form.action, {
+                                                    method: 'POST',
+                                                    body: new FormData(form),
+                                                    headers: { 'Accept': 'application/json' }
+                                                });
+                                                const data = await response.json();
+                                                if (response.ok) {
+                                                    input.classList.remove('border-red-300', 'dark:border-red-600');
+                                                    input.classList.add('border-green-300', 'dark:border-green-600');
+                                                    setTimeout(() => input.classList.remove('border-green-300', 'dark:border-green-600'), 1500);
+                                                } else {
+                                                    input.value = originalValue;
+                                                    input.classList.add('border-red-300', 'dark:border-red-600');
+                                                    setTimeout(() => input.classList.remove('border-red-300', 'dark:border-red-600'), 2000);
+                                                }
+                                            } catch (err) {
+                                                input.value = originalValue;
+                                            }
+                                        }">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="number" name="order" value="{{ $post->order }}" min="0"
+                                            class="w-16 px-2 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                        <button type="submit" class="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400" title="Update order">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </td>
                                 <td class="px-4 py-3 text-right">
                                     <button @click="showEdit = true; editPost = @js(['id' => $post->id, 'title' => $post->title, 'slug' => $post->slug, 'body' => $post->body, 'category_id' => $post->category_id, 'thumbnail' => $post->thumbnail, 'published_at' => $post->published_at ? $post->published_at->toIsoString() : null, 'tags' => $post->tags->pluck('id')->toArray()])"
                                         class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium text-sm mr-3">
@@ -118,7 +160,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="8" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                                     No posts yet. Create your first post!
                                 </td>
                             </tr>

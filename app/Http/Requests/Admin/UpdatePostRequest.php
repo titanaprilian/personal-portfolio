@@ -23,6 +23,7 @@ class UpdatePostRequest extends FormRequest
             'published_at' => ['nullable', 'date'],
             'tag_ids' => ['nullable', 'array'],
             'tag_ids.*' => ['exists:post_tags,id'],
+            'order' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }

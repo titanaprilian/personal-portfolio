@@ -20,6 +20,7 @@ class Post extends Model
         'reading_time',
         'published_at',
         'category_id',
+        'order',
     ];
 
     protected function casts(): array
@@ -27,7 +28,15 @@ class Post extends Model
         return [
             'published_at' => 'datetime',
             'reading_time' => 'integer',
+            'order' => 'integer',
         ];
+    }
+
+    public static function getNextOrder(): int
+    {
+        $maxOrder = static::max('order');
+
+        return ($maxOrder ?? -1) + 1;
     }
 
     public function category(): BelongsTo
