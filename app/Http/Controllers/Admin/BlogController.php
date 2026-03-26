@@ -85,7 +85,7 @@ class BlogController extends Controller
     public function updateOrder(Post $post): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $validator = \Illuminate\Support\Facades\Validator::make(request()->all(), [
-            'order' => ['required', 'integer', 'min:0', new \App\Rules\UniquePostOrder],
+            'order' => ['required', 'integer', 'min:0'],
         ]);
 
         if ($validator->fails()) {
@@ -96,9 +96,31 @@ class BlogController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        $order = request()->input('order');
+        $newOrder = (int) request()->input('order');
+        $oldOrder = $post->order;
 
-        $post->update(['order' => $order]);
+        if ($newOrder === $oldOrder) {
+            if (request()->expectsJson()) {
+                return response()->json(['success' => 'Post order updated.']);
+            }
+
+            return back()->with('success', 'Post order updated.');
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($post, $newOrder, $oldOrder) {
+            $maxOrder = Post::max('order') ?? 0;
+            $tempOrder = $maxOrder + 1;
+
+            $post->update(['order' => $tempOrder]);
+
+            $otherPost = Post::where('order', $newOrder)->first();
+
+            if ($otherPost) {
+                $otherPost->update(['order' => $oldOrder]);
+            }
+
+            $post->update(['order' => $newOrder]);
+        });
 
         if (request()->expectsJson()) {
             return response()->json(['success' => 'Post order updated.']);
