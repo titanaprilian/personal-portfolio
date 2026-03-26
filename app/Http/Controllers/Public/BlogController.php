@@ -33,6 +33,7 @@ class BlogController extends Controller
             ->when($selectedTag, function ($query) use ($selectedTag) {
                 $query->whereHas('tags', fn ($q) => $q->where('slug', $selectedTag));
             })
+            ->orderBy('order')
             ->orderByDesc('published_at')
             ->paginate(9)
             ->withQueryString();
