@@ -217,7 +217,7 @@
             <form method="POST" action="{{ route('admin.projects.store') }}" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="_form" value="create">
-                <x-admin.project-form :project="null" :categories="$categories" :tags="$tags" formId="create-project-form" />
+                <x-admin.project-form :project="null" :categories="$categories" :tags="$tags" :occupied-slots="$occupiedSlots" formId="create-project-form" />
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button type="button" @click="showCreate = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">Cancel</button>
                     <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">Create Project</button>
@@ -334,17 +334,22 @@
                             </div>
                         </div>
 
-                        <div>
+                        <div x-data="{ occupiedSlots: {{ json_encode($occupiedSlots) }} }">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Featured Slot</label>
                             <select name="featured_order"
                                 x-model="editProject.featured_order"
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">None</option>
-                                <option value="1">Slot 1 (Primary)</option>
-                                <option value="2">Slot 2</option>
-                                <option value="3">Slot 3</option>
+                                <option value="1" x-show="!occupiedSlots.includes(1) || editProject.featured_order == 1">Slot 1 (Primary)</option>
+                                <option value="2" x-show="!occupiedSlots.includes(2) || editProject.featured_order == 2">Slot 2</option>
+                                <option value="3" x-show="!occupiedSlots.includes(3) || editProject.featured_order == 3">Slot 3</option>
                             </select>
-                            <p class="text-xs text-gray-400 mt-1">Max 3 featured projects allowed</p>
+                            <template x-if="occupiedSlots.length >= 3 && editProject.featured_order == null">
+                                <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">All featured slots are taken. Remove a featured project first or set a featured project's slot to none.</p>
+                            </template>
+                            <template x-if="occupiedSlots.length > 0 && occupiedSlots.length < 3 && !occupiedSlots.includes(editProject.featured_order)">
+                                <p class="text-xs text-gray-400 mt-1">Other slots are already assigned to other projects.</p>
+                            </template>
                             <p class="text-xs text-gray-400 mt-1">Use inline order field in the list to reorder unfeatured projects.</p>
                         </div>
                     </div>

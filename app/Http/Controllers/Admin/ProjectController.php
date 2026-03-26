@@ -25,7 +25,11 @@ class ProjectController extends Controller
         $categories = ProjectCategory::orderBy('name')->get();
         $tags = ProjectTag::orderBy('name')->get();
 
-        return view('admin.projects.index', compact('projects', 'categories', 'tags'));
+        $occupiedSlots = Project::whereNotNull('featured_order')
+            ->pluck('featured_order')
+            ->toArray();
+
+        return view('admin.projects.index', compact('projects', 'categories', 'tags', 'occupiedSlots'));
     }
 
     public function store(StoreProjectRequest $request): RedirectResponse

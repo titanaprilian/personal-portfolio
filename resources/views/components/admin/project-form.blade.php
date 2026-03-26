@@ -1,8 +1,11 @@
-@props(['project' => null, 'categories', 'tags', 'formId'])
+@props(['project' => null, 'categories', 'tags', 'formId', 'occupiedSlots' => []])
 
 @php
     $categoryNameMap = $categories->pluck('name', 'id')->toJson();
     $tagNameMap = $tags->pluck('name', 'id')->toJson();
+    $currentSlot = $project?->featured_order ?? null;
+    $filteredSlots = array_filter([1, 2, 3], fn($slot) => !in_array($slot, $occupiedSlots) || $slot === $currentSlot);
+    $hasHiddenSlots = count($filteredSlots) < 3;
 @endphp
 
 <div x-data="{
@@ -155,11 +158,23 @@
             <select name="featured_order" x-model="featuredOrder"
                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
                 <option value="">None</option>
-                <option value="1" {{ old('featured_order', $project?->featured_order ?? '') == 1 ? 'selected' : '' }}>Slot 1 (Primary)</option>
-                <option value="2" {{ old('featured_order', $project?->featured_order ?? '') == 2 ? 'selected' : '' }}>Slot 2</option>
-                <option value="3" {{ old('featured_order', $project?->featured_order ?? '') == 3 ? 'selected' : '' }}>Slot 3</option>
+                @if(in_array(1, $filteredSlots))
+                    <option value="1" {{ old('featured_order', $project?->featured_order ?? '') == 1 ? 'selected' : '' }}>Slot 1 (Primary)</option>
+                @endif
+                @if(in_array(2, $filteredSlots))
+                    <option value="2" {{ old('featured_order', $project?->featured_order ?? '') == 2 ? 'selected' : '' }}>Slot 2</option>
+                @endif
+                @if(in_array(3, $filteredSlots))
+                    <option value="3" {{ old('featured_order', $project?->featured_order ?? '') == 3 ? 'selected' : '' }}>Slot 3</option>
+                @endif
             </select>
-            <p class="text-xs text-gray-400 mt-1">Max 3 featured projects allowed</p>
+            @if($hasHiddenSlots && count($filteredSlots) === 0)
+                <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">All featured slots are taken. Remove a featured project first or set a featured project's slot to none.</p>
+            @elseif($hasHiddenSlots)
+                <p class="text-xs text-gray-400 mt-1">Other slots are already assigned to other projects.</p>
+            @else
+                <p class="text-xs text-gray-400 mt-1">Max 3 featured projects allowed</p>
+            @endif
             <p class="text-xs text-gray-400 mt-1">Use inline order field in the list to reorder unfeatured projects.</p>
             @error('featured_order')
                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
