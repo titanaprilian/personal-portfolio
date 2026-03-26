@@ -74,7 +74,7 @@ class ProjectController extends Controller
     public function updateOrder(Project $project): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $validator = \Illuminate\Support\Facades\Validator::make(request()->all(), [
-            'order' => ['required', 'integer', 'min:0', new \App\Rules\UniqueOrderForUnfeatured],
+            'order' => ['required', 'integer', 'min:0'],
         ]);
 
         if ($validator->fails()) {
@@ -85,9 +85,38 @@ class ProjectController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        $order = request()->input('order');
+        $project->refresh();
+        $newOrder = (int) request()->input('order');
+        $oldOrder = (int) $project->order;
 
-        $project->update(['order' => $order]);
+        if ($newOrder === $oldOrder) {
+            if (request()->expectsJson()) {
+                return response()->json(['success' => 'Project order updated.']);
+            }
+
+            return back()->with('success', 'Project order updated.');
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($project, $newOrder, $oldOrder) {
+            $projectId = $project->id;
+
+            Project::lockForUpdate()->get();
+
+            $maxOrder = (int) Project::max('order');
+            $tempOrder = $maxOrder + 10000;
+
+            $project->update(['order' => $tempOrder]);
+
+            $otherProject = Project::where('order', $newOrder)
+                ->where('id', '!=', $projectId)
+                ->first();
+
+            if ($otherProject) {
+                $otherProject->update(['order' => $oldOrder]);
+            }
+
+            $project->update(['order' => $newOrder]);
+        });
 
         if (request()->expectsJson()) {
             return response()->json(['success' => 'Project order updated.']);

@@ -16,7 +16,8 @@ class UniqueOrderForUnfeatured implements ValidationRule
 
         $projectId = request()->route('project')?->id;
 
-        $exists = Project::where('order', $value)
+        $exists = Project::whereNull('featured_order')
+            ->where('order', $value)
             ->when($projectId, fn ($q) => $q->where('id', '!=', $projectId))
             ->exists();
 

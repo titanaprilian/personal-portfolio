@@ -54,7 +54,7 @@
                             </th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider overflow-visible">
                                 <span>Order</span>
-                                <x-admin.tooltip text="Controls the display order on the public page. Lower numbers appear first. Featured projects use their slot number (1, 2, 3) for ordering instead." />
+                                <x-admin.tooltip text="Controls the display order on the public page. Lower numbers appear first. You can swap orders by changing the number to an existing value." />
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -120,9 +120,7 @@
                                                 });
                                                 const data = await response.json();
                                                 if (response.ok) {
-                                                    input.classList.remove('border-red-300', 'dark:border-red-600');
-                                                    input.classList.add('border-green-300', 'dark:border-green-600');
-                                                    setTimeout(() => input.classList.remove('border-green-300', 'dark:border-green-600'), 1500);
+                                                    window.location.href = window.location.href;
                                                 } else {
                                                     input.value = originalValue;
                                                     input.classList.add('border-red-300', 'dark:border-red-600');
