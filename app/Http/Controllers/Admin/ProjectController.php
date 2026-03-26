@@ -85,8 +85,9 @@ class ProjectController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        $project->refresh();
         $newOrder = (int) request()->input('order');
-        $oldOrder = $project->order;
+        $oldOrder = (int) $project->order;
 
         if ($newOrder === $oldOrder) {
             if (request()->expectsJson()) {
@@ -97,13 +98,17 @@ class ProjectController extends Controller
         }
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($project, $newOrder, $oldOrder) {
-            $maxOrder = Project::max('order') ?? 0;
-            $tempOrder = $maxOrder + 1;
+            $projectId = $project->id;
+
+            Project::lockForUpdate()->get();
+
+            $maxOrder = (int) Project::max('order');
+            $tempOrder = $maxOrder + 10000;
 
             $project->update(['order' => $tempOrder]);
 
-            $otherProject = Project::whereNull('featured_order')
-                ->where('order', $newOrder)
+            $otherProject = Project::where('order', $newOrder)
+                ->where('id', '!=', $projectId)
                 ->first();
 
             if ($otherProject) {

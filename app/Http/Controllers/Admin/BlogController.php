@@ -96,8 +96,9 @@ class BlogController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        $post->refresh();
         $newOrder = (int) request()->input('order');
-        $oldOrder = $post->order;
+        $oldOrder = (int) $post->order;
 
         if ($newOrder === $oldOrder) {
             if (request()->expectsJson()) {
@@ -108,12 +109,18 @@ class BlogController extends Controller
         }
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($post, $newOrder, $oldOrder) {
-            $maxOrder = Post::max('order') ?? 0;
-            $tempOrder = $maxOrder + 1;
+            $postId = $post->id;
+
+            Post::lockForUpdate()->get();
+
+            $maxOrder = (int) Post::max('order');
+            $tempOrder = $maxOrder + 10000;
 
             $post->update(['order' => $tempOrder]);
 
-            $otherPost = Post::where('order', $newOrder)->first();
+            $otherPost = Post::where('order', $newOrder)
+                ->where('id', '!=', $postId)
+                ->first();
 
             if ($otherPost) {
                 $otherPost->update(['order' => $oldOrder]);
