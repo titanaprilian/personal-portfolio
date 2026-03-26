@@ -35,6 +35,13 @@ class Project extends Model
         return $query->whereNotNull('featured_order')->orderBy('featured_order');
     }
 
+    public static function getNextOrder(): int
+    {
+        $maxOrder = static::whereNull('featured_order')->max('order');
+
+        return ($maxOrder ?? -1) + 1;
+    }
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(ProjectCategory::class, 'project_category', 'project_id', 'category_id');
