@@ -32,10 +32,11 @@ class HomeController extends Controller
         }
 
         $skills = Skill::query()
+            ->with('skillCategory')
             ->orderBy('order')
             ->orderBy('name')
             ->get()
-            ->groupBy('category');
+            ->groupBy(fn ($skill) => $skill->skillCategory?->name ?? 'Uncategorized');
 
         $experiences = Experience::query()
             ->orderByDesc('is_current')

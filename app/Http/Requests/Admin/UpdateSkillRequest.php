@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateSkillRequest extends FormRequest
 {
@@ -16,7 +15,7 @@ class UpdateSkillRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:100'],
-            'category' => ['required', 'string', Rule::in(['Backend', 'Frontend', 'DevOps', 'Tools'])],
+            'skill_category_id' => ['required', 'exists:skill_categories,id'],
             'proficiency' => ['required', 'integer', 'min:0', 'max:100'],
             'icon' => ['nullable', 'string', 'max:100'],
             'order' => ['required', 'integer', 'min:0'],

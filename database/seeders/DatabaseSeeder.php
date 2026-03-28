@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             PostCategorySeeder::class,
             PostTagSeeder::class,
             PostSeeder::class,
+            SkillCategorySeeder::class,
             SkillSeeder::class,
             ExperienceSeeder::class,
             ContactSeeder::class,
