@@ -60,11 +60,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/skills/{skill}', [SkillController::class, 'update'])->name('admin.skills.update');
     Route::delete('/admin/skills/{skill}', [SkillController::class, 'destroy'])->name('admin.skills.destroy');
 
-    Route::get('/admin/skills-categories', [SkillCategoryController::class, 'index'])->name('admin.skills-categories.index');
-    Route::post('/admin/skills-categories', [SkillCategoryController::class, 'store'])->name('admin.skills-categories.store');
-    Route::put('/admin/skills-categories/{skill_category}', [SkillCategoryController::class, 'update'])->name('admin.skills-categories.update');
-    Route::delete('/admin/skills-categories/{skill_category}', [SkillCategoryController::class, 'destroy'])->name('admin.skills-categories.destroy');
-
     Route::resource('/admin/experiences', ExperienceController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->names('admin.experiences');
