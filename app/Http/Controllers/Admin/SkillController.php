@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreSkillRequest;
 use App\Http\Requests\Admin\UpdateSkillRequest;
 use App\Models\Skill;
+use App\Models\SkillCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -14,11 +15,14 @@ class SkillController extends Controller
     public function index(): View
     {
         $skills = Skill::query()
+            ->with('skillCategory')
             ->orderBy('order')
             ->orderBy('name')
             ->paginate(20);
 
-        return view('admin.skills.index', compact('skills'));
+        $categories = SkillCategory::orderBy('name')->get();
+
+        return view('admin.skills.index', compact('skills', 'categories'));
     }
 
     public function store(StoreSkillRequest $request): RedirectResponse

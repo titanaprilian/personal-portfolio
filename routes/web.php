@@ -59,6 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/skills', [SkillController::class, 'store'])->name('admin.skills.store');
     Route::put('/admin/skills/{skill}', [SkillController::class, 'update'])->name('admin.skills.update');
     Route::delete('/admin/skills/{skill}', [SkillController::class, 'destroy'])->name('admin.skills.destroy');
+
     Route::resource('/admin/experiences', ExperienceController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->names('admin.experiences');

@@ -28,10 +28,10 @@ class DashboardController extends Controller
         ];
 
         $skillsByCategory = Skill::query()
-            ->selectRaw('category, COUNT(*) as count')
-            ->groupBy('category')
-            ->orderBy('category')
-            ->pluck('count', 'category');
+            ->with('skillCategory')
+            ->get()
+            ->groupBy(fn ($skill) => $skill->skillCategory?->name ?? 'Uncategorized')
+            ->map(fn ($skills) => $skills->count());
 
         $skillsCategoryData = [
             'labels' => $skillsByCategory->keys()->values()->toArray(),

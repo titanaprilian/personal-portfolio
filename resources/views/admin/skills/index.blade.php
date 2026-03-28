@@ -4,13 +4,13 @@
         showEdit: {{ $errors->any() && old('_form') === 'edit' ? 'true' : 'false' }},
         showDelete: false,
         editSkill: null,
-        editForm: { name: '', category: '', proficiency: 80, icon: '', order: 0 },
+        editForm: { name: '', skill_category_id: '', proficiency: 80, icon: '', order: 0 },
         deleteSkill: null,
         initEditForm() {
             if (this.editSkill) {
                 this.editForm = {
                     name: this.editSkill.name || '',
-                    category: this.editSkill.category || '',
+                    skill_category_id: this.editSkill.skill_category_id || '',
                     proficiency: this.editSkill.proficiency ?? 80,
                     icon: this.editSkill.icon || '',
                     order: this.editSkill.order ?? 0
@@ -68,16 +68,8 @@
                                 </td>
                                 <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{{ $skill->name }}</td>
                                 <td class="px-4 py-3">
-                                    @php
-                                        $categoryColors = [
-                                            'Backend' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-                                            'Frontend' => 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
-                                            'DevOps' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
-                                            'Tools' => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-                                        ];
-                                    @endphp
-                                    <span class="px-2 py-0.5 text-xs rounded-full {{ $categoryColors[$skill->category] ?? 'bg-gray-100 text-gray-700' }}">
-                                        {{ $skill->category }}
+                                    <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                                        {{ $skill->skillCategory->name }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 min-w-32">
@@ -130,8 +122,8 @@
                                 @endif
                                 <div class="flex-1">
                                     <h3 class="font-medium text-gray-900 dark:text-gray-100">{{ $skill->name }}</h3>
-                                    <span class="px-2 py-0.5 text-xs rounded-full {{ $categoryColors[$skill->category] ?? 'bg-gray-100 text-gray-700' }}">
-                                        {{ $skill->category }}
+                                    <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                                        {{ $skill->skillCategory->name }}
                                     </span>
                                 </div>
                             </div>
@@ -194,14 +186,13 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <select name="category"
+                        <select name="skill_category_id"
                             class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
                             required>
                             <option value="">— Select category —</option>
-                            <option value="Backend" {{ old('category') === 'Backend' ? 'selected' : '' }}>Backend</option>
-                            <option value="Frontend" {{ old('category') === 'Frontend' ? 'selected' : '' }}>Frontend</option>
-                            <option value="DevOps" {{ old('category') === 'DevOps' ? 'selected' : '' }}>DevOps</option>
-                            <option value="Tools" {{ old('category') === 'Tools' ? 'selected' : '' }}>Tools</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ old('skill_category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                            @endforeach
                         </select>
                     </div>
 
@@ -271,14 +262,13 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                            <select name="category" x-model="editForm.category"
+                            <select name="skill_category_id" x-model="editForm.skill_category_id"
                                 class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
                                 required>
                                 <option value="">— Select category —</option>
-                                <option value="Backend">Backend</option>
-                                <option value="Frontend">Frontend</option>
-                                <option value="DevOps">DevOps</option>
-                                <option value="Tools">Tools</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
                             </select>
                         </div>
 

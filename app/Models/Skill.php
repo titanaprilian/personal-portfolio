@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Skill extends Model
 {
@@ -11,7 +12,7 @@ class Skill extends Model
 
     protected $fillable = [
         'name',
-        'category',
+        'skill_category_id',
         'proficiency',
         'icon',
         'order',
@@ -23,5 +24,10 @@ class Skill extends Model
             'proficiency' => 'integer',
             'order' => 'integer',
         ];
+    }
+
+    public function skillCategory(): BelongsTo
+    {
+        return $this->belongsTo(SkillCategory::class);
     }
 }
