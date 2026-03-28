@@ -9,6 +9,20 @@ class ProjectTagSeeder extends Seeder
 {
     public function run(): void
     {
-        ProjectTag::factory()->count(12)->create();
+        $tags = [
+            'Laravel',
+            'React',
+            'Tailwind',
+            'Node.js',
+            'Typescript',
+            'Postgres',
+            'Mysql',
+            'docker',
+            'nextjs',
+        ];
+
+        foreach ($tags as $tag) {
+            ProjectTag::create(['name' => $tag]);
+        }
     }
 }

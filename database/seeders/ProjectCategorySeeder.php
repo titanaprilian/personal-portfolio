@@ -9,6 +9,15 @@ class ProjectCategorySeeder extends Seeder
 {
     public function run(): void
     {
-        ProjectCategory::factory()->count(6)->create();
+        $categories = [
+            'Web App',
+            'API',
+            'DevOps',
+            'Machine Learning',
+        ];
+
+        foreach ($categories as $category) {
+            ProjectCategory::create(['name' => $category]);
+        }
     }
 }

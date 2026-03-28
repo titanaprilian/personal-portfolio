@@ -18,15 +18,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ProjectCategorySeeder::class,
             ProjectTagSeeder::class,
-            ProjectSeeder::class,
             PostCategorySeeder::class,
             PostTagSeeder::class,
-            PostSeeder::class,
             SkillCategorySeeder::class,
             SkillSeeder::class,
-            ExperienceSeeder::class,
-            ContactSeeder::class,
-            ResumeSeeder::class,
         ]);
     }
 }

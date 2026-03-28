@@ -13,25 +13,13 @@ class SkillSeeder extends Seeder
         $categories = SkillCategory::pluck('id', 'name')->toArray();
 
         $skills = [
-            ['name' => 'Laravel', 'category' => 'Backend'],
-            ['name' => 'PHP', 'category' => 'Backend'],
-            ['name' => 'Node.js', 'category' => 'Backend'],
-            ['name' => 'MySQL', 'category' => 'Backend'],
-            ['name' => 'PostgreSQL', 'category' => 'Backend'],
-            ['name' => 'Redis', 'category' => 'Backend'],
-            ['name' => 'Vue.js', 'category' => 'Frontend'],
+            ['name' => 'Laravel', 'category' => 'Fullstack'],
+            ['name' => 'Next.js', 'category' => 'Fullstack'],
             ['name' => 'React', 'category' => 'Frontend'],
-            ['name' => 'Alpine.js', 'category' => 'Frontend'],
-            ['name' => 'Tailwind CSS', 'category' => 'Frontend'],
-            ['name' => 'TypeScript', 'category' => 'Frontend'],
-            ['name' => 'Three.js', 'category' => 'Frontend'],
             ['name' => 'Docker', 'category' => 'DevOps'],
-            ['name' => 'AWS', 'category' => 'DevOps'],
-            ['name' => 'GitHub Actions', 'category' => 'DevOps'],
-            ['name' => 'Linux', 'category' => 'DevOps'],
-            ['name' => 'Git', 'category' => 'Tools'],
-            ['name' => 'Figma', 'category' => 'Tools'],
+            ['name' => 'Linux', 'category' => 'Tools'],
             ['name' => 'VS Code', 'category' => 'Tools'],
+            ['name' => 'Neovim', 'category' => 'Tools'],
         ];
 
         foreach ($skills as $index => $skillData) {

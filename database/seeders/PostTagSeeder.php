@@ -9,6 +9,17 @@ class PostTagSeeder extends Seeder
 {
     public function run(): void
     {
-        PostTag::factory()->count(10)->create();
+        $tags = [
+            'php',
+            'laravel',
+            'bun',
+            'docker',
+            'nodejs',
+            'elysia',
+        ];
+
+        foreach ($tags as $tag) {
+            PostTag::create(['name' => $tag]);
+        }
     }
 }
