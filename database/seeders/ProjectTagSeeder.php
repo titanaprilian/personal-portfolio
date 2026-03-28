@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\ProjectTag;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class ProjectTagSeeder extends Seeder
 {
@@ -22,7 +23,10 @@ class ProjectTagSeeder extends Seeder
         ];
 
         foreach ($tags as $tag) {
-            ProjectTag::create(['name' => $tag]);
+            ProjectTag::create([
+                'name' => $tag,
+                'slug' => Str::slug($tag),
+            ]);
         }
     }
 }

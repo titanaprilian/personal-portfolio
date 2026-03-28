@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\PostCategory;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class PostCategorySeeder extends Seeder
 {
@@ -19,7 +20,10 @@ class PostCategorySeeder extends Seeder
         ];
 
         foreach ($categories as $category) {
-            PostCategory::create(['name' => $category]);
+            PostCategory::create([
+                'name' => $category,
+                'slug' => Str::slug($category),
+            ]);
         }
     }
 }

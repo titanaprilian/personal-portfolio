@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\PostTag;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class PostTagSeeder extends Seeder
 {
@@ -19,7 +20,10 @@ class PostTagSeeder extends Seeder
         ];
 
         foreach ($tags as $tag) {
-            PostTag::create(['name' => $tag]);
+            PostTag::create([
+                'name' => $tag,
+                'slug' => Str::slug($tag),
+            ]);
         }
     }
 }

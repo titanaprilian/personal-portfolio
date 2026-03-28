@@ -13,6 +13,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('skill_categories')
                 ->onDelete('set null');
+            $table->dropColumn('category');
         });
     }
 
