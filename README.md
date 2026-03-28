@@ -1,59 +1,155 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# 🧑‍💻 titanaprilian — Personal Portfolio
 
-## About Laravel
+[![Laravel](https://img.shields.io/badge/Laravel-v12-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square&logo=php&logoColor=white)](https://php.net)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+A personal portfolio and blog built with Laravel — showcasing projects, writing, and professional experience.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**🌐 [titanic.my.id](https://titanic.my.id)**
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+</div>
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## About
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+This is a full-stack personal portfolio web application serving as a project showcase, blog platform, and CV replacement. Built and maintained by [@titanaprilian](https://github.com/titanaprilian).
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Features
 
-### Premium Partners
+- **Project Showcase** — list of projects with detail pages, category/tag filtering, and a featured section that highlights up to 3 key projects
+- **Blog** — writing with rich text support (Quill.js), categories, tags, search, and reading time
+- **About & CV** — about page and downloadable resume PDF managed through the admin panel
+- **Contact Form** — public contact form with messages stored and viewable in the admin panel
+- **Admin Panel** — full CRUD for projects, blog posts, skills, experiences, contacts, and resume uploads; protected by authentication
+- **Inline Order Editing** — drag-free reordering of projects and blog posts directly from the admin table
+- **Dark Mode** — UI supports light and dark themes across admin and public pages
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## Tech Stack
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Layer            | Technology                        |
+| ---------------- | --------------------------------- |
+| Language         | PHP 8.3                           |
+| Framework        | Laravel 12                        |
+| Authentication   | Laravel Breeze 2                  |
+| Frontend         | Blade, Alpine.js, Tailwind CSS v4 |
+| Rich Text Editor | Quill.js                          |
+| Build Tool       | Vite                              |
+| Testing          | PHPUnit 11                        |
+| Code Style       | Laravel Pint                      |
+| Database         | MySQL                             |
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Getting Started
 
-## Security Vulnerabilities
+### Prerequisites
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- PHP >= 8.3
+- Composer
+- Node.js & npm
+- MySQL
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/titanaprilian/personal-portfolio.git
+cd personal-portfolio
+
+# Install PHP dependencies
+composer install
+
+# Install Node dependencies
+npm install
+
+# Copy environment file and configure it
+cp .env.example .env
+php artisan key:generate
+
+# Run database migrations and seed
+php artisan migrate
+php artisan db:seed
+
+# Build frontend assets
+npm run build
+
+# Start the development server
+php artisan serve
+```
+
+Visit `http://localhost:8000` in your browser.
+
+### Development Commands
+
+```bash
+# Start Vite dev server (hot reload)
+npm run dev
+
+# Run tests
+php artisan test
+
+# Format code
+vendor/bin/pint
+```
+
+### Admin Panel
+
+After creating an account, access the admin panel at `/admin`.
+
+---
+
+## Deployment
+
+A `bundle.sh` script is available to package the app into a `.zip` ready for cPanel shared hosting, with `public_html/` separated from the Laravel app root.
+
+```bash
+bash bundle.sh
+```
+
+---
+
+## Project Structure
+
+```
+app/
+├── Http/Controllers/
+│   ├── Admin/          # Admin panel controllers
+│   └── Public/         # Public-facing controllers
+├── Models/             # Eloquent models
+└── Rules/              # Custom validation rules
+database/
+├── migrations/         # Database migrations
+└── seeders/            # Database seeders
+resources/
+└── views/
+    ├── components/
+    │   └── admin/      # Reusable admin Blade components
+    └── public/         # Public-facing views
+routes/
+├── web.php
+└── auth.php
+tests/
+├── Feature/            # Feature tests
+└── Unit/               # Unit tests
+```
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+  <sub>Built by <a href="https://github.com/titanaprilian">@titanaprilian</a> · <a href="https://titanic.my.id">titanic.my.id</a></sub>
+</div>
