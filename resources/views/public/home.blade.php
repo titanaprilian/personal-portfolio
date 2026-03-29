@@ -60,7 +60,7 @@
                       animation: fadeSlideUp 0.5s ease 0.15s both">
               I build clean, performant web applications with a focus on
               great developer experience and elegant code. Currently working
-              with Laravel, Vue.js, and modern JavaScript.
+              with Laravel, Next.js, and modern JavaScript.
             </p>
 
             <div class="flex flex-wrap items-center gap-4"
