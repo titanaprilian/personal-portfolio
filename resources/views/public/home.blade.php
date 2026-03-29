@@ -214,47 +214,40 @@
         </h2>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 lg:gap-x-12 gap-y-16">
         @foreach($skills as $category => $categorySkills)
 
-          <div class="flex md:items-start gap-4">
-            <p class="text-xs font-display tracking-widest uppercase md:text-right min-w-[120px] pt-2"
-               style="color: var(--color-muted)">
+          <div class="flex flex-col items-center">
+            <h3 class="text-[10px] font-display tracking-[0.2em] uppercase opacity-40 border-b pb-2 mb-8 w-full text-center"
+                style="color: var(--color-text); border-color: rgba(255,255,255,0.05)">
               {{ $category }}
-            </p>
+            </h3>
 
-            <div class="flex flex-wrap gap-3">
+            <div class="flex flex-wrap justify-center gap-y-10 gap-x-8 w-full">
               @foreach($categorySkills as $skill)
                 <a href="{{ route('about') }}#skills"
-                   class="group flex flex-col items-center gap-2 px-4 py-3
-                          rounded-xl border transition-all duration-200"
-                   style="border-color: var(--color-border);
-                          background: var(--color-surface);"
-                   onmouseover="this.style.borderColor='rgba(0,255,224,0.3)';
-                                this.style.background='rgba(0,255,224,0.05)'"
-                   onmouseout="this.style.borderColor='var(--color-border)';
-                               this.style.background='var(--color-surface)'"
+                   class="group flex flex-col items-center justify-center text-center w-20"
                    title="{{ $skill->name }}">
 
-                  @if($skill->icon)
-                    <img src="https://cdn.simpleicons.org/{{ $skill->icon }}"
-                         alt="{{ $skill->name }}"
-                         class="w-6 h-6 object-contain opacity-75
-                                group-hover:opacity-100 transition-opacity"
-                         loading="lazy" />
-                  @else
-                    <div class="w-6 h-6 rounded flex items-center justify-center
-                                text-xs font-display font-bold"
-                         style="background: rgba(0,255,224,0.1);
-                                color: var(--color-neon)">
-                      {{ strtoupper(substr($skill->name, 0, 2)) }}
-                    </div>
-                  @endif
-
-                  <span class="text-xs font-display whitespace-nowrap transition-colors"
+                  <span class="text-[10px] font-display font-bold tracking-tight opacity-40 group-hover:opacity-100 transition-opacity truncate w-full mb-3 px-1"
                         style="color: var(--color-muted)">
                     {{ $skill->name }}
                   </span>
+
+                  <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300
+                              bg-white/[0.03] border border-white/[0.05] group-hover:bg-white/[0.08] group-hover:border-white/[0.1]">
+                    @if($skill->icon)
+                      <img src="https://cdn.simpleicons.org/{{ $skill->icon }}"
+                           alt="{{ $skill->name }}"
+                           class="w-6 h-6 object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                           loading="lazy" />
+                    @else
+                      <div class="font-display text-[10px] font-bold opacity-60 group-hover:opacity-100"
+                           style="color: var(--color-neon)">
+                        {{ strtoupper(substr($skill->name, 0, 2)) }}
+                      </div>
+                    @endif
+                  </div>
 
                 </a>
               @endforeach
