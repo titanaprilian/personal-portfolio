@@ -20,6 +20,70 @@
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+    <style>
+        /* Editor container - highest priority */
+        .EasyMDEContainer .editor-toolbar { 
+            background-color: #1f2937 !important; 
+            border-bottom: 1px solid #4b5563 !important; 
+        }
+        .EasyMDEContainer .editor-toolbar a, 
+        .EasyMDEContainer .editor-toolbar button,
+        .EasyMDEContainer .editor-toolbar > * { 
+            color: #e5e7eb !important; 
+        }
+        .EasyMDEContainer .editor-toolbar a:hover, 
+        .EasyMDEContainer .editor-toolbar a.active,
+        .EasyMDEContainer .editor-toolbar button:hover { 
+            background-color: #fff !important; 
+            color: #000 !important; 
+        }
+        .EasyMDEContainer .editor-toolbar i.separator { 
+            border-color: #4b5563 !important; 
+        }
+        /* Editor area */
+        .EasyMDEContainer .CodeMirror { 
+            background-color: #1f2937 !important; 
+            border: 1px solid #4b5563 !important; 
+            color: #e5e7eb !important; 
+        }
+        .EasyMDEContainer .CodeMirror-cursor { 
+            border-color: #fff !important; 
+        }
+        .EasyMDEContainer .CodeMirror.CodeMirror-focused .CodeMirror-selected { 
+            background: #374151 !important; 
+        }
+        .EasyMDEContainer .CodeMirror-selected { 
+            background: #374151 !important; 
+        }
+        .EasyMDEContainer .CodeMirror-lines, 
+        .EasyMDEContainer .CodeMirror pre { 
+            color: #e5e7eb !important; 
+        }
+        .EasyMDEContainer .CodeMirror textarea { 
+            color: #e5e7eb !important; 
+        }
+        .EasyMDEContainer .CodeMirror textarea::placeholder { 
+            color: #9ca3af !important; 
+        }
+        /* Preview */
+        .EasyMDEContainer .editor-preview { 
+            background-color: #1f2937 !important; 
+            color: #e5e7eb !important; 
+        }
+        .EasyMDEContainer .editor-preview pre { 
+            background-color: #111827 !important; 
+            border: 1px solid #374151 !important; 
+            color: #e5e7eb !important; 
+        }
+        .EasyMDEContainer .editor-preview-full { 
+            background-color: #1f2937 !important; 
+            color: #e5e7eb !important; 
+        }
+        .EasyMDEContainer .editor-statusbar { 
+            display: none !important; 
+        }
+    </style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -39,6 +103,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
     @stack('scripts')
 </body>
 

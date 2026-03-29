@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use League\CommonMark\CommonMarkConverter;
 
 class Project extends Model
 {
@@ -50,5 +51,19 @@ class Project extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(ProjectTag::class, 'project_tag', 'project_id', 'tag_id');
+    }
+
+    public function getBodyHtmlAttribute(): string
+    {
+        if (empty($this->body)) {
+            return '';
+        }
+
+        $converter = new CommonMarkConverter([
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+
+        return $converter->convert($this->body);
     }
 }
