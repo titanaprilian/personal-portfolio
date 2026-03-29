@@ -198,8 +198,7 @@
            style="animation: fadeSlideUp 0.5s ease 0.2s both;">
 
     <div class="prose-content">
-      {{-- Body rendered as raw HTML — safe because content is admin-authored only --}}
-      {!! $project->body !!}
+      {!! $project->body_html !!}
     </div>
 
   </section>
