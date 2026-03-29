@@ -214,16 +214,16 @@
         </h2>
       </div>
 
-      <div class="space-y-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
         @foreach($skills as $category => $categorySkills)
 
-          <div>
-            <p class="text-xs font-display tracking-widest uppercase mb-4 text-center"
+          <div class="flex md:items-start gap-4">
+            <p class="text-xs font-display tracking-widest uppercase md:text-right min-w-[120px] pt-2"
                style="color: var(--color-muted)">
               {{ $category }}
             </p>
 
-            <div class="flex flex-wrap items-center justify-center gap-3">
+            <div class="flex flex-wrap gap-3">
               @foreach($categorySkills as $skill)
                 <a href="{{ route('about') }}#skills"
                    class="group flex flex-col items-center gap-2 px-4 py-3
