@@ -146,10 +146,6 @@
 
     </div>
 
-    <p class="text-xs text-[--color-muted]/50 font-display mt-2">
-      // scroll to see more screenshots
-    </p>
-
   </section>
   @endif
 
