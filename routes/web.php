@@ -17,15 +17,20 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/projects', [PublicProjectController::class, 'index'])->name('projects.index');
-Route::get('/projects/{project:slug}', [PublicProjectController::class, 'show'])->name('projects.show');
-Route::get('/blog', [PublicBlogController::class, 'index'])->name('blog.index');
-Route::get('/blog/{post:slug}', [PublicBlogController::class, 'show'])->name('blog.show');
-Route::get('/about', [PublicAboutController::class, 'index'])->name('about');
-Route::get('/contact', [PublicContactController::class, 'index'])->name('contact');
-Route::post('/contact', [PublicContactController::class, 'store'])->name('contact.store');
-Route::get('/contact/thanks', [PublicContactController::class, 'thanks'])->name('contact.thanks');
+Route::middleware('throttle:public')->group(function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+    Route::get('/projects', [PublicProjectController::class, 'index'])->name('projects.index');
+    Route::get('/projects/{project:slug}', [PublicProjectController::class, 'show'])->name('projects.show');
+    Route::get('/blog', [PublicBlogController::class, 'index'])->name('blog.index');
+    Route::get('/blog/{post:slug}', [PublicBlogController::class, 'show'])->name('blog.show');
+    Route::get('/about', [PublicAboutController::class, 'index'])->name('about');
+    Route::get('/contact', [PublicContactController::class, 'index'])->name('contact');
+    Route::get('/contact/thanks', [PublicContactController::class, 'thanks'])->name('contact.thanks');
+});
+
+Route::post('/contact', [PublicContactController::class, 'store'])
+    ->middleware('throttle:contact')
+    ->name('contact.store');
 
 Route::get('/resume/download', function () {
     $resume = \App\Models\Resume::where('is_active', true)->first();
@@ -38,9 +43,9 @@ Route::get('/resume/download', function () {
         $resume->file_path,
         Str::slug($resume->label).'.pdf'
     );
-})->name('resume.download');
+})->middleware('throttle:resume')->name('resume.download');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'throttle:admin'])->group(function () {
     Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::get('/admin/projects', [ProjectController::class, 'index'])->name('admin.projects.index');
