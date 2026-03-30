@@ -38,7 +38,7 @@ class Project extends Model
 
     public static function getNextOrder(): int
     {
-        $maxOrder = static::whereNull('featured_order')->max('order');
+        $maxOrder = static::max('order');
 
         return ($maxOrder ?? -1) + 1;
     }

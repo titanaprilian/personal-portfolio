@@ -40,8 +40,10 @@ class ProjectController extends Controller
             $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails/projects', 'public');
         }
 
-        if (empty($data['order'])) {
+        if (empty($data['featured_order'])) {
             $data['order'] = Project::getNextOrder();
+        } else {
+            $data['order'] = Project::max('order') + 1;
         }
 
         $project = Project::create($data);

@@ -23,6 +23,9 @@
         showDelete: false,
         editProject: {{ $oldEditProject ? json_encode($oldEditProject) : 'null' }},
         deleteProject: null,
+        submittingCreate: false,
+        submittingEdit: false,
+        submittingDelete: false,
     }">
         @if(session('success'))
             <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
@@ -111,7 +114,9 @@
                                         @submit.prevent="async (e) => {
                                             const form = e.target;
                                             const input = form.querySelector('input[name=order]');
+                                            const button = form.querySelector('button[type=submit]');
                                             const originalValue = input.value;
+                                            button.disabled = true;
                                             try {
                                                 const response = await fetch(form.action, {
                                                     method: 'POST',
@@ -128,15 +133,21 @@
                                                 }
                                             } catch (err) {
                                                 input.value = originalValue;
+                                            } finally {
+                                                button.disabled = false;
                                             }
                                         }">
                                         @csrf
                                         @method('PATCH')
                                         <input type="number" name="order" value="{{ $project->order }}" min="0"
                                             class="w-16 px-2 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                                        <button type="submit" class="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400" title="Update order">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <button type="submit" class="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed" title="Update order">
+                                            <svg x-show="!$el.disabled" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <svg x-show="$el.disabled" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                             </svg>
                                         </button>
                                     </form>
@@ -212,20 +223,31 @@
         </div>
 
         <x-admin.dialog :open="'showCreate'" title="Add New Project" :close="'showCreate = false'" max-width="max-w-3xl">
-            <form method="POST" action="{{ route('admin.projects.store') }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('admin.projects.store') }}" enctype="multipart/form-data"
+                @submit="submittingCreate = true">
                 @csrf
                 <input type="hidden" name="_form" value="create">
                 <x-admin.project-form :project="null" :categories="$categories" :tags="$tags" :occupied-slots="$occupiedSlots" formId="create-project-form" />
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button type="button" @click="showCreate = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">Create Project</button>
+                    <button type="submit" :disabled="submittingCreate" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center gap-2">
+                        <span x-show="!submittingCreate">Create Project</span>
+                        <span x-show="submittingCreate" class="flex items-center gap-2">
+                            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Creating...
+                        </span>
+                    </button>
                 </div>
             </form>
         </x-admin.dialog>
 
         <x-admin.dialog :open="'showEdit'" title="Edit Project" :close="'showEdit = false; editProject = null'" max-width="max-w-3xl">
             <template x-if="editProject">
-                <form method="POST" :action="`/admin/projects/${editProject.id}`" enctype="multipart/form-data">
+                <form method="POST" :action="`/admin/projects/${editProject.id}`" enctype="multipart/form-data"
+                    @submit="submittingEdit = true">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="_form" value="edit">
@@ -279,40 +301,49 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thumbnail</label>
                             <div x-data="{ 
-                                preview: editProject.thumbnail ? '{{ asset('storage/') }}/' + editProject.thumbnail : null,
+                                preview: editProject?.thumbnail ? '{{ asset('storage/') }}/' + editProject.thumbnail : null,
                                 init() {
-                                    this.$watch('editProject.thumbnail', (val) => {
-                                        this.preview = val ? '{{ asset('storage/') }}/' + val : null;
+                                    this.$watch('editProject', () => {
+                                        if (editProject?.thumbnail) {
+                                            this.preview = '{{ asset('storage/') }}/' + editProject.thumbnail;
+                                        } else {
+                                            this.preview = null;
+                                        }
                                     });
                                 }
-                            }" class="space-y-2">
-                                <div class="relative w-full h-32 border-2 border-dashed rounded-lg transition-colors border-gray-300 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-500 dark:bg-gray-800 overflow-hidden">
+                            }">
+                                <div class="relative">
                                     <input type="file" name="thumbnail" accept="image/jpg,image/jpeg,image/png,image/webp"
                                         @change="const file = $event.target.files[0]; if (file && file.size > 2 * 1024 * 1024) { alert('File size must not exceed 2MB.'); $event.target.value = ''; return; } if (file) { preview = URL.createObjectURL(file); } else { preview = null; }"
                                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                                    <template x-if="!preview">
-                                        <div class="flex flex-col items-center justify-center h-full p-4">
-                                            <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                                <span class="font-medium text-indigo-600 dark:text-indigo-400">Click to upload</span>
-                                                or drag and drop
-                                            </p>
-                                            <p class="text-xs text-gray-400">JPG, PNG, WEBP · Max 2MB</p>
-                                        </div>
-                                    </template>
-                                    <template x-if="preview">
-                                        <div class="relative w-full h-full group">
-                                            <img :src="preview" class="w-full h-full object-cover">
-                                            <button type="button" @click="preview = null; editProject.thumbnail = null; $refs.thumbnailInput.value = ''"
-                                                class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    <div class="flex items-center justify-center w-full h-48 border-2 border-dashed rounded-lg transition-colors
+                                        border-gray-300 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-500 dark:bg-gray-800 overflow-hidden">
+                                        <template x-if="!preview">
+                                            <div class="text-center p-4">
+                                                <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
-                                            </button>
-                                        </div>
-                                    </template>
+                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                                    <span class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500">Click to upload</span>
+                                                    or drag and drop
+                                                </p>
+                                                <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP · Max 2MB</p>
+                                            </div>
+                                        </template>
+                                        <template x-if="preview">
+                                            <div class="relative group p-2">
+                                                <img :src="preview" class="h-40 w-auto max-w-full rounded-lg object-contain shadow-sm">
+                                                <div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button type="button" @click.stop="preview = null; editProject.thumbnail = null; $refs.thumbnailInput.value = ''"
+                                                        class="bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-md">
+                                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
                                 <input type="file" x-ref="thumbnailInput" style="display: none;" accept="image/jpg,image/jpeg,image/png,image/webp">
                             </div>
@@ -320,7 +351,7 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categories</label>
-                            <div x-data="{ selected: editProject.categories.map(c => c.id), map: {{ $categories->pluck('name', 'id')->toJson() }} }">
+                            <div x-data="{ selected: editProject?.categories?.map(c => c.id) || [], map: {{ $categories->pluck('name', 'id')->toJson() }} }">
                                 <div class="flex flex-wrap gap-2 mb-2">
                                     <template x-for="id in selected" :key="id">
                                         <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
@@ -342,7 +373,7 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
-                            <div x-data="{ selected: editProject.tags.map(t => t.id), map: {{ $tags->pluck('name', 'id')->toJson() }} }">
+                            <div x-data="{ selected: editProject?.tags?.map(t => t.id) || [], map: {{ $tags->pluck('name', 'id')->toJson() }} }">
                                 <div class="flex flex-wrap gap-2 mb-2">
                                     <template x-for="id in selected" :key="id">
                                         <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
@@ -378,13 +409,28 @@
                             <template x-if="occupiedSlots.length > 0 && occupiedSlots.length < 3 && !occupiedSlots.includes(editProject.featured_order)">
                                 <p class="text-xs text-gray-400 mt-1">Other slots are already assigned to other projects.</p>
                             </template>
-                            <p class="text-xs text-gray-400 mt-1">Use inline order field in the list to reorder unfeatured projects.</p>
+                        </div>
+
+                        <div x-show="!editProject.featured_order">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Order</label>
+                            <input type="number" name="order" x-model="editProject.order" min="0"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                            <p class="text-xs text-gray-400 mt-1">Display order on public page. Lower numbers appear first.</p>
                         </div>
                     </div>
 
                     <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <button type="button" @click="showEdit = false; editProject = null" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">Save Changes</button>
+                        <button type="submit" :disabled="submittingEdit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center gap-2">
+                            <span x-show="!submittingEdit">Save Changes</span>
+                            <span x-show="submittingEdit" class="flex items-center gap-2">
+                                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Saving...
+                            </span>
+                        </button>
                     </div>
                 </form>
             </template>
@@ -396,12 +442,22 @@
                 <span class="font-semibold text-gray-800 dark:text-gray-200" x-text="deleteProject?.title"></span>?
                 This action cannot be undone.
             </p>
-            <form method="POST" :action="deleteProject ? `/admin/projects/${deleteProject.id}` : ''" class="mt-6">
+            <form method="POST" :action="deleteProject ? `/admin/projects/${deleteProject.id}` : ''" class="mt-6"
+                @submit="submittingDelete = true">
                 @csrf
                 @method('DELETE')
                 <div class="flex justify-end gap-3">
                     <button type="button" @click="showDelete = false; deleteProject = null" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">Yes, Delete</button>
+                    <button type="submit" :disabled="submittingDelete" class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center gap-2">
+                        <span x-show="!submittingDelete">Yes, Delete</span>
+                        <span x-show="submittingDelete" class="flex items-center gap-2">
+                            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Deleting...
+                        </span>
+                    </button>
                 </div>
             </form>
         </x-admin.dialog>
