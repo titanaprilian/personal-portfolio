@@ -114,34 +114,36 @@
                     <input type="file" name="thumbnail" accept="image/jpg,image/jpeg,image/png,image/webp"
                         @change="const file = $event.target.files[0]; if (file && file.size > 2 * 1024 * 1024) { alert('File size must not exceed 2MB.'); $event.target.value = ''; preview = ''; fileName = ''; return; } if (file) { preview = URL.createObjectURL(file); fileName = file.name; }"
                         class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                    <div class="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors
+                    <div class="flex items-center justify-center w-full h-48 border-2 border-dashed rounded-lg transition-colors
                         {{ $project?->thumbnail ? 'border-gray-300 dark:border-gray-600' : 'border-gray-300 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-500' }}
-                        dark:bg-gray-800">
+                        dark:bg-gray-800 overflow-hidden">
                         <template x-if="!preview">
                             <div class="text-center p-4">
-                                <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                     <span class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">Click to upload</span>
                                     or drag and drop
                                 </p>
                                 <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP · Max 2MB</p>
                             </div>
                         </template>
+                        <template x-if="preview">
+                            <div class="relative group p-2">
+                                <img :src="preview" class="h-40 w-auto max-w-full rounded-lg object-contain shadow-sm">
+                                <div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button type="button" @click.stop="preview = ''; fileName = ''; $refs.fileInput.value = ''"
+                                        class="bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-md">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>
-                <template x-if="preview">
-                    <div class="relative mt-2 group">
-                        <img :src="preview" class="h-32 w-auto rounded-lg object-cover border border-gray-200 dark:border-gray-700">
-                        <button type="button" @click="preview = ''; fileName = ''; $refs.fileInput.value = ''"
-                            class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                </template>
                 <input type="file" x-ref="fileInput" style="display: none;">
             </div>
             @error('thumbnail')
@@ -227,10 +229,21 @@
             @else
                 <p class="text-xs text-gray-400 mt-1">Max 3 featured projects allowed</p>
             @endif
-            <p class="text-xs text-gray-400 mt-1">Use inline order field in the list to reorder unfeatured projects.</p>
             @error('featured_order')
                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
             @enderror
         </div>
+
+        @if($project)
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Order</label>
+            <input type="number" name="order" value="{{ old('order', $project->order) }}" min="0"
+                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+            <p class="text-xs text-gray-400 mt-1">Display order on public page. Lower numbers appear first.</p>
+            @error('order')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </div>
+        @endif
     </div>
 </div>
