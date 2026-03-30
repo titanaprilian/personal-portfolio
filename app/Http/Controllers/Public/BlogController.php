@@ -95,9 +95,9 @@ class BlogController extends Controller
             $relatedPosts = $relatedPosts->merge($filler);
         }
 
-        $extracted = $this->extractHeadings($post->body ?? '');
+        $extracted = $this->extractHeadings($post->body_html ?? '');
         $headings = $extracted['headings'] ?? [];
-        $body = $extracted['body'] ?? $post->body;
+        $body = $extracted['body'] ?? $post->body_html;
 
         return view('public.blog.show', compact('post', 'relatedPosts', 'headings', 'body'));
     }
@@ -119,7 +119,7 @@ class BlogController extends Controller
 
         $headings = [];
         $xpath = new \DOMXPath($dom);
-        $nodes = $xpath->query('//h1 | //h2 | //h3');
+        $nodes = $xpath->query('//h1 | //h2');
 
         foreach ($nodes as $node) {
             $text = trim($node->textContent);

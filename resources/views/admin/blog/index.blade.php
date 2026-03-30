@@ -1,9 +1,25 @@
+@php
+    $oldEditPost = null;
+    if ($errors->any() && old('_form') === 'edit') {
+        $oldEditPost = [
+            'id' => old('id'),
+            'title' => old('title'),
+            'slug' => old('slug'),
+            'category_id' => old('category_id'),
+            'body' => old('body'),
+            'published_at' => old('published_at'),
+            'tags' => array_map('intval', old('tag_ids', [])),
+            'thumbnail' => old('thumbnail_path'), // We should pass the path back if we want to preserve preview
+        ];
+    }
+@endphp
+
 <x-layouts.admin title="Blog Posts">
     <div x-data="{
         showCreate: {{ $errors->any() && old('_form') === 'create' ? 'true' : 'false' }},
         showEdit: {{ $errors->any() && old('_form') === 'edit' ? 'true' : 'false' }},
         showDelete: false,
-        editPost: null,
+        editPost: {{ $oldEditPost ? json_encode($oldEditPost) : 'null' }},
         deletePost: null,
     }">
         @if (session('success'))
@@ -15,7 +31,7 @@
 
         <div class="mb-6 flex items-center justify-between">
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Blog Posts</h1>
-            <button @click="showCreate = true"
+            <button @click="showCreate = true; setTimeout(() => initCreateEditor(), 100)"
                 class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
                 + New Post
             </button>
@@ -86,14 +102,12 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex flex-wrap gap-1">
-                                        @foreach ($post->tags->take(3) as $tag)
+                                        @foreach ($tags->whereIn('id', $post->tags->pluck('id')) as $tag)
                                             <span
-                                                class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">{{ $tag->name }}</span>
+                                                class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                                {{ $tag->name }}
+                                            </span>
                                         @endforeach
-                                        @if ($post->tags->count() > 3)
-                                            <span
-                                                class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">+{{ $post->tags->count() - 3 }}</span>
-                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-4 py-3">
@@ -146,7 +160,8 @@
                                     </form>
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    <button @click="showEdit = true; editPost = @js(['id' => $post->id, 'title' => $post->title, 'slug' => $post->slug, 'body' => $post->body, 'category_id' => $post->category_id, 'thumbnail' => $post->thumbnail, 'published_at' => $post->published_at ? $post->published_at->toIsoString() : null, 'tags' => $post->tags->pluck('id')->toArray()])"
+                                    <button
+                                        @click="showEdit = true; editPost = @js(['id' => $post->id, 'title' => $post->title, 'slug' => $post->slug, 'body' => $post->body, 'category_id' => $post->category_id, 'thumbnail' => $post->thumbnail, 'published_at' => $post->published_at ? $post->published_at->toIsoString() : null, 'tags' => $post->tags->pluck('id')->toArray()]); setTimeout(() => initEditEditor(editPost.body), 100)"
                                         class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium text-sm mr-3">
                                         Edit
                                     </button>
@@ -202,15 +217,18 @@
                                     <span
                                         class="px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">{{ $post->category->name }}</span>
                                 @endif
-                                @foreach ($post->tags->take(2) as $tag)
+                                @foreach ($tags->whereIn('id', $post->tags->pluck('id')) as $tag)
                                     <span
-                                        class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">{{ $tag->name }}</span>
+                                        class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                        {{ $tag->name }}
+                                    </span>
                                 @endforeach
                             </div>
                             <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ $post->reading_time }} min
                                 read</div>
                             <div class="flex gap-2">
-                                <button @click="showEdit = true; editPost = @js(['id' => $post->id, 'title' => $post->title, 'slug' => $post->slug, 'body' => $post->body, 'category_id' => $post->category_id, 'thumbnail' => $post->thumbnail, 'published_at' => $post->published_at ? $post->published_at->toIsoString() : null, 'tags' => $post->tags->pluck('id')->toArray()])"
+                                <button
+                                    @click="showEdit = true; editPost = @js(['id' => $post->id, 'title' => $post->title, 'slug' => $post->slug, 'body' => $post->body, 'category_id' => $post->category_id, 'thumbnail' => $post->thumbnail, 'published_at' => $post->published_at ? $post->published_at->toIsoString() : null, 'tags' => $post->tags->pluck('id')->toArray()]); setTimeout(() => initEditEditor(editPost.body), 100)"
                                     class="flex-1 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium text-sm transition-colors">
                                     Edit
                                 </button>
@@ -233,41 +251,108 @@
             {{ $posts->links() }}
         </div>
 
-        <x-admin.dialog :open="'showCreate'" title="New Blog Post" :close="'showCreate = false'" max-width="max-w-4xl">
-            <form method="POST" action="{{ route('admin.blog.store') }}" enctype="multipart/form-data">
+        <x-admin.dialog :open="'showCreate'" title="Add New Post" :close="'showCreate = false'" max-width="max-w-4xl">
+            <form method="POST" action="{{ route('admin.blog.store') }}" enctype="multipart/form-data" id="create-post-form">
                 @csrf
                 <input type="hidden" name="_form" value="create">
 
                 <div class="space-y-4">
-                    <div x-data="{ title: '{{ old('title', '') }}', slug: '{{ old('slug', '') }}' }">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                            <input type="text" name="title" value="{{ old('title') }}"
-                                @input="title = $event.target.value; slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
-                                required>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div x-data="{ title: '{{ old('title', '') }}', slug: '{{ old('slug', '') }}' }" class="col-span-full grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                                <input type="text" name="title" value="{{ old('title') }}"
+                                    @input="title = $event.target.value; slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
+                                    required>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Slug</label>
+                                <input type="text" name="slug" value="{{ old('slug') }}" x-model="slug"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
+                                    required>
+                            </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Slug</label>
-                            <input type="text" name="slug" value="{{ old('slug') }}" x-model="slug"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
-                                required>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                            <select name="category_id"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">— No category —</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}"
+                                        {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
-                    </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                        <select name="category_id"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="">— No category —</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}"
-                                    {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div x-data="dateTimePicker('{{ old('published_at') }}')">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Publish Date <span class="text-gray-400 text-xs">(optional)</span>
+                            </label>
+                            <div class="relative">
+                                <input type="hidden" name="published_at" x-model="value">
+                                <button type="button" @click="showPicker = !showPicker"
+                                    class="w-full flex items-center justify-between px-4 py-2 text-left rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                    <span x-text="displayValue"></span>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="showPicker" @click.away="showPicker = false" x-cloak
+                                    class="absolute left-0 mt-2 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 w-full sm:w-80">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Date</label>
+                                            <input type="date" x-model="date"
+                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Hour</label>
+                                                <div class="grid grid-cols-4 gap-1 overflow-y-auto max-h-40 p-1 border border-gray-100 dark:border-gray-700 rounded-lg">
+                                                    <template x-for="h in Array.from({length: 24}, (_, i) => i)" :key="h">
+                                                        <button type="button" 
+                                                            @click="selectHour(h)"
+                                                            :class="hour == h.toString().padStart(2, '0') ? 'bg-indigo-600 text-white' : 'hover:bg-indigo-50 dark:hover:bg-indigo-900/40 text-gray-700 dark:text-gray-300'"
+                                                            class="px-1 py-2 text-xs rounded transition-colors"
+                                                            x-text="h.toString().padStart(2, '0')"></button>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Minute</label>
+                                                <div class="grid grid-cols-2 gap-1 overflow-y-auto max-h-40 p-1 border border-gray-100 dark:border-gray-700 rounded-lg">
+                                                    <template x-for="m in Array.from({length: 12}, (_, i) => i * 5)" :key="m">
+                                                        <button type="button" 
+                                                            @click="selectMinute(m)"
+                                                            :class="selectedMinute == m.toString().padStart(2, '0') ? 'bg-indigo-600 text-white' : 'hover:bg-indigo-50 dark:hover:bg-indigo-900/40 text-gray-700 dark:text-gray-300'"
+                                                            class="px-1 py-2 text-xs rounded transition-colors"
+                                                            x-text="m.toString().padStart(2, '0')"></button>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+                                            <button type="button" @click="clear()" 
+                                                class="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium">
+                                                Clear to Draft
+                                            </button>
+                                            <button type="button" @click="showPicker = false" 
+                                                class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition-colors">
+                                                Done
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
@@ -295,12 +380,11 @@
                         </div>
                     </div>
 
-                    <div x-data="quillEditor('{{ old('body', '') }}')">
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Body</label>
-                        <div class="bg-white dark:bg-gray-800 dark:text-gray-100">
-                            <div x-ref="editor" style="min-height: 200px;"></div>
-                        </div>
-                        <textarea name="body" x-ref="textarea" class="hidden">{{ old('body') }}</textarea>
+                        <textarea name="body" id="body-editor"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
+                            rows="4">{{ old('body') }}</textarea>
                         @error('body')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -309,24 +393,43 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Featured
                             Image</label>
-                        <div x-data="{ preview: null }">
-                            <input type="file" name="thumbnail" accept="image/jpg,image/jpeg,image/png,image/webp"
-                                @change="const file = $event.target.files[0]; if (file) { if (file.size > 2 * 1024 * 1024) { alert('File size must be less than 2MB'); $event.target.value = ''; return; } const reader = new FileReader(); reader.onload = (e) => preview = e.target.result; reader.readAsDataURL(file); }"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                            <template x-if="preview">
-                                <img :src="preview"
-                                    class="mt-2 h-32 w-auto rounded-lg object-cover border border-gray-200 dark:border-gray-700">
-                            </template>
-                            <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP · Max 2MB</p>
+                        <div x-data="{ preview: null, fileName: '' }">
+                            <div class="relative">
+                                <input type="file" name="thumbnail" x-ref="thumbnailInput"
+                                    accept="image/jpg,image/jpeg,image/png,image/webp"
+                                    @change="const file = $event.target.files[0]; if (file) { if (file.size > 2 * 1024 * 1024) { alert('File size must be less than 2MB'); $event.target.value = ''; preview = ''; fileName = ''; return; } const reader = new FileReader(); reader.onload = (e) => preview = e.target.result; reader.readAsDataURL(file); fileName = file.name; }"
+                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                <div class="flex items-center justify-center w-full h-48 border-2 border-dashed rounded-lg transition-colors
+                                    border-gray-300 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-500 dark:bg-gray-800 overflow-hidden">
+                                    <template x-if="!preview">
+                                        <div class="text-center p-4">
+                                            <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                                <span class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500">Click to upload</span>
+                                                or drag and drop
+                                            </p>
+                                            <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP · Max 2MB</p>
+                                        </div>
+                                    </template>
+                                    <template x-if="preview">
+                                        <div class="relative group p-2">
+                                            <img :src="preview"
+                                                class="h-32 w-auto max-w-full rounded-lg object-contain shadow-sm">
+                                            <div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button type="button" @click.stop="preview = null; fileName = ''; $refs.thumbnailInput.value = ''"
+                                                    class="bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-md">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Publish Date <span class="text-gray-400 text-xs">(leave empty to save as draft)</span>
-                        </label>
-                        <input type="datetime-local" name="published_at" value="{{ old('published_at') }}"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
                 </div>
 
@@ -342,100 +445,181 @@
 
         <x-admin.dialog :open="'showEdit'" title="Edit Post" :close="'showEdit = false; editPost = null'" max-width="max-w-4xl">
             <template x-if="editPost">
-                <form method="POST" :action="`/admin/blog/${editPost.id}`" enctype="multipart/form-data">
+                <form method="POST" :action="`/admin/blog/${editPost.id}`" enctype="multipart/form-data" id="edit-post-form">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="_form" value="edit">
+                    <input type="hidden" name="id" :value="editPost.id">
 
                     <div class="space-y-4">
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                            <input type="text" name="title" x-model="editPost.title"
-                                @input="editPost.slug = (editPost.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
-                                required>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Slug</label>
-                            <input type="text" name="slug" x-model="editPost.slug"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
-                                required>
-                        </div>
-
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                            <select name="category_id" x-model="editPost.category_id"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">— No category —</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
-                            <div x-data="{ selected: editPost.tags || [], map: {{ $tags->pluck('name', 'id')->toJson() }} }">
-                                <div class="flex flex-wrap gap-2 mb-2">
-                                    <template x-for="id in selected" :key="id">
-                                        <span
-                                            class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                                            <span x-text="map[id]"></span>
-                                            <button type="button"
-                                                @click="selected = selected.filter(s => s !== id)">×</button>
-                                            <input type="hidden" name="tag_ids[]" :value="id">
-                                        </span>
-                                    </template>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="col-span-full grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                                    <input type="text" name="title" x-model="editPost.title"
+                                        @input="editPost.slug = (editPost.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')"
+                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
+                                        required>
                                 </div>
-                                <select
-                                    @change="if ($event.target.value && !selected.includes(Number($event.target.value))) { selected.push(Number($event.target.value)); editPost.tags = selected; } $event.target.value = ''"
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Slug</label>
+                                    <input type="text" name="slug" x-model="editPost.slug"
+                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                                <select name="category_id" x-model="editPost.category_id"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">+ Add tag</option>
-                                    @foreach ($tags as $tag)
-                                        <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                    <option value="">— No category —</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                        </div>
-                        <div x-data="quillEditor(editPost.body)">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Body</label>
-                            <div class="bg-white dark:bg-gray-800 dark:text-gray-100"
-                                @set-edit-content.window="if(editPost) { quill.root.innerHTML = editPost.body }">
-                                <div x-ref="editor" style="min-height: 200px;"></div>
-                            </div>
-                            <textarea name="body" x-ref="textarea" x-model="editPost.body" class="hidden"></textarea>
-                        </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Featured
-                                Image</label>
-                            <div x-data="{ preview: null }">
-                                <template x-if="editPost.thumbnail && !preview">
-                                    <img :src="'{{ asset('storage/') }}/' + editPost.thumbnail"
-                                        class="mt-2 h-32 w-auto rounded-lg object-cover border border-gray-200 dark:border-gray-700 mb-2">
-                                </template>
-                                <template x-if="preview">
-                                    <img :src="preview"
-                                        class="mt-2 h-32 w-auto rounded-lg object-cover border border-gray-200 dark:border-gray-700 mb-2">
-                                </template>
-                                <input type="file" name="thumbnail"
-                                    accept="image/jpg,image/jpeg,image/png,image/webp"
-                                    @change="const file = $event.target.files[0]; if (file) { if (file.size > 2 * 1024 * 1024) { alert('File size must be less than 2MB'); $event.target.value = ''; return; } const reader = new FileReader(); reader.onload = (e) => preview = e.target.result; reader.readAsDataURL(file); }"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                                <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP · Max 2MB</p>
+                            <div x-data="dateTimePicker(editPost.published_at)">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Publish Date <span class="text-gray-400 text-xs">(optional)</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="hidden" name="published_at" x-model="value">
+                                    <button type="button" @click="showPicker = !showPicker"
+                                        class="w-full flex items-center justify-between px-4 py-2 text-left rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                        <span x-text="displayValue"></span>
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </button>
+
+                                    <div x-show="showPicker" @click.away="showPicker = false" x-cloak
+                                        class="absolute left-0 mt-2 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 w-full sm:w-80">
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Date</label>
+                                                <input type="date" x-model="date"
+                                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                            </div>
+                                            
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Hour</label>
+                                                    <div class="grid grid-cols-4 gap-1 overflow-y-auto max-h-40 p-1 border border-gray-100 dark:border-gray-700 rounded-lg">
+                                                        <template x-for="h in Array.from({length: 24}, (_, i) => i)" :key="h">
+                                                            <button type="button" 
+                                                                @click="selectHour(h)"
+                                                                :class="hour == h.toString().padStart(2, '0') ? 'bg-indigo-600 text-white' : 'hover:bg-indigo-50 dark:hover:bg-indigo-900/40 text-gray-700 dark:text-gray-300'"
+                                                                class="px-1 py-2 text-xs rounded transition-colors"
+                                                                x-text="h.toString().padStart(2, '0')"></button>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Minute</label>
+                                                    <div class="grid grid-cols-2 gap-1 overflow-y-auto max-h-40 p-1 border border-gray-100 dark:border-gray-700 rounded-lg">
+                                                        <template x-for="m in Array.from({length: 12}, (_, i) => i * 5)" :key="m">
+                                                            <button type="button" 
+                                                                @click="selectMinute(m)"
+                                                                :class="selectedMinute == m.toString().padStart(2, '0') ? 'bg-indigo-600 text-white' : 'hover:bg-indigo-50 dark:hover:bg-indigo-900/40 text-gray-700 dark:text-gray-300'"
+                                                                class="px-1 py-2 text-xs rounded transition-colors"
+                                                                x-text="m.toString().padStart(2, '0')"></button>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+                                                <button type="button" @click="clear()" 
+                                                    class="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium">
+                                                    Clear to Draft
+                                                </button>
+                                                <button type="button" @click="showPicker = false" 
+                                                    class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition-colors">
+                                                    Done
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Publish Date <span class="text-gray-400 text-xs">(leave empty to save as draft)</span>
-                            </label>
-                            <input type="datetime-local" name="published_at"
-                                :value="editPost.published_at ? new Date(editPost.published_at).toISOString().slice(0, 16) : ''"
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
+                        <div x-data="{ selected: editPost.tags || [], map: {{ $tags->pluck('name', 'id')->toJson() }} }">
+                            <div class="flex flex-wrap gap-2 mb-2">
+                                <template x-for="id in selected" :key="id">
+                                    <span
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                                        <span x-text="map[id]"></span>
+                                        <button type="button"
+                                            @click="selected = selected.filter(s => s !== id)">×</button>
+                                        <input type="hidden" name="tag_ids[]" :value="id">
+                                    </span>
+                                </template>
+                            </div>
+                            <select
+                                @change="if ($event.target.value && !selected.includes(Number($event.target.value))) { selected.push(Number($event.target.value)); editPost.tags = selected; } $event.target.value = ''"
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">+ Add tag</option>
+                                @foreach ($tags as $tag)
+                                    <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Body</label>
+                        <textarea name="body" id="body-editor-edit" x-model="editPost.body"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500"
+                            rows="4"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Featured
+                            Image</label>
+                        <div x-data="{ preview: editPost.thumbnail ? '{{ asset('storage/') }}/' + editPost.thumbnail : null, fileName: '' }">
+                            <div class="relative">
+                                <input type="file" name="thumbnail" x-ref="thumbnailInput"
+                                    accept="image/jpg,image/jpeg,image/png,image/webp"
+                                    @change="const file = $event.target.files[0]; if (file) { if (file.size > 2 * 1024 * 1024) { alert('File size must be less than 2MB'); $event.target.value = ''; preview = ''; fileName = ''; return; } const reader = new FileReader(); reader.onload = (e) => preview = e.target.result; reader.readAsDataURL(file); fileName = file.name; }"
+                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                <div class="flex items-center justify-center w-full h-48 border-2 border-dashed rounded-lg transition-colors
+                                    border-gray-300 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-500 dark:bg-gray-800 overflow-hidden">
+                                    <template x-if="!preview">
+                                        <div class="text-center p-4">
+                                            <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                                <span class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500">Click to upload</span>
+                                                or drag and drop
+                                            </p>
+                                            <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP · Max 2MB</p>
+                                        </div>
+                                    </template>
+                                    <template x-if="preview">
+                                        <div class="relative group p-2">
+                                            <img :src="preview"
+                                                class="h-32 w-auto max-w-full rounded-lg object-contain shadow-sm">
+                                            <div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button type="button" @click.stop="preview = null; fileName = ''; $refs.thumbnailInput.value = ''"
+                                                    class="bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-md">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -470,42 +654,171 @@
         </x-admin.dialog>
 
     </div>
-</x-layouts.admin>
 
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('quillEditor', (content) => ({
-            quill: null,
-            init() {
-                this.quill = new Quill(this.$refs.editor, {
-                    theme: 'snow',
-                    modules: {
-                        toolbar: [
-                            // Added heading levels here
-                            [{
-                                'header': [1, 2, 3, false]
-                            }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{
-                                'list': 'ordered'
-                            }, {
-                                'list': 'bullet'
-                            }],
-                            ['link', 'blockquote', 'code-block'],
-                            ['clean']
-                        ]
+    @push('scripts')
+    <script>
+        window.createEasyMDE = null;
+        window.editEasyMDE = null;
+
+        window.initCreateEditor = function() {
+            const textarea = document.getElementById('body-editor');
+            if (!textarea || window.createEasyMDE) return;
+
+            window.createEasyMDE = new EasyMDE({
+                element: textarea,
+                spellChecker: false,
+                placeholder: 'Write your post in markdown...',
+                status: false,
+                toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'code', 'code-block', '|', 'unordered-list', 'ordered-list', '|', 'link', '|', 'preview', 'side-by-side', 'fullscreen'],
+                sideBySideFullspace: false,
+            });
+        };
+
+        window.initEditEditor = function(content) {
+            const textarea = document.getElementById('body-editor-edit');
+            if (!textarea) return;
+
+            if (window.editEasyMDE) {
+                try {
+                    window.editEasyMDE.toTextArea();
+                } catch (e) {}
+                window.editEasyMDE = null;
+            }
+
+            textarea.value = content || '';
+            window.editEasyMDE = new EasyMDE({
+                element: textarea,
+                spellChecker: false,
+                placeholder: 'Write your post in markdown...',
+                status: false,
+                toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'code', 'code-block', '|', 'unordered-list', 'ordered-list', '|', 'link', '|', 'preview', 'side-by-side', 'fullscreen'],
+                sideBySideFullspace: false,
+            });
+
+            window.editEasyMDE.codemirror.on('change', () => {
+                textarea.value = window.editEasyMDE.value();
+                textarea.dispatchEvent(new Event('input'));
+            });
+        };
+
+        const registerDateTimePicker = () => {
+            Alpine.data('dateTimePicker', (initialValue) => ({
+                value: initialValue || '',
+                date: '',
+                hour: '00',
+                selectedMinute: '00',
+                showPicker: false,
+                init() {
+                    if (this.value) {
+                        const d = new Date(this.value.replace(' ', 'T'));
+                        if (!isNaN(d.getTime())) {
+                            const year = d.getFullYear();
+                            const month = (d.getMonth() + 1).toString().padStart(2, '0');
+                            const day = d.getDate().toString().padStart(2, '0');
+                            this.date = `${year}-${month}-${day}`;
+                            this.hour = d.getHours().toString().padStart(2, '0');
+                            this.selectedMinute = d.getMinutes().toString().padStart(2, '0');
+                        }
                     }
-                });
+                    this.$watch('date', () => this.updateValue());
+                    this.$watch('hour', () => this.updateValue());
+                    this.$watch('selectedMinute', () => this.updateValue());
+                },
+                updateValue() {
+                    if (this.date) {
+                        this.value = `${this.date} ${this.hour}:${this.selectedMinute}`;
+                    } else {
+                        this.value = '';
+                    }
+                },
+                get displayValue() {
+                    if (!this.value || !this.date) return 'Draft (Immediate)';
+                    const d = new Date(this.date + 'T' + this.hour + ':' + this.selectedMinute);
+                    if (isNaN(d.getTime())) return 'Draft (Immediate)';
+                    return d.toLocaleDateString([], {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    }) + ' ' + this.hour + ':' + this.selectedMinute;
+                },
+                selectHour(h) {
+                    this.hour = h.toString().padStart(2, '0');
+                },
+                selectMinute(m) {
+                    this.selectedMinute = m.toString().padStart(2, '0');
+                },
+                clear() {
+                    this.date = '';
+                    this.value = '';
+                    this.showPicker = false;
+                }
+            }));
+        };
 
-                if (content) {
-                    this.quill.root.innerHTML = content;
+        if (typeof Alpine !== 'undefined' && Alpine.data) {
+            registerDateTimePicker();
+        } else {
+            document.addEventListener('alpine:init', registerDateTimePicker);
+        }
+
+        (function() {
+            document.addEventListener('DOMContentLoaded', function() {
+                window.initCreateEditor();
+
+                const createForm = document.getElementById('create-post-form');
+                if (createForm) {
+                    createForm.addEventListener('submit', function() {
+                        if (window.createEasyMDE) {
+                            const area = document.getElementById('body-editor');
+                            if (area) area.value = window.createEasyMDE.value();
+                        }
+                    });
                 }
 
-                this.quill.on('text-change', () => {
-                    this.$refs.textarea.value = this.quill.root.innerHTML;
-                    this.$refs.textarea.dispatchEvent(new Event('input'));
+                const editForm = document.getElementById('edit-post-form');
+                if (editForm) {
+                    editForm.addEventListener('submit', function() {
+                        if (window.editEasyMDE) {
+                            const area = document.getElementById('body-editor-edit');
+                            if (area) area.value = window.editEasyMDE.value();
+                        }
+                    });
+                }
+
+                const editObserver = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                            const target = mutation.target;
+                            if (target.style.display !== 'none' && target.getAttribute('x-show') === 'showEdit') {
+                                const rootEl = document.querySelector('[x-data]');
+                                if (rootEl && window.Alpine) {
+                                    const rootData = window.Alpine.$data(rootEl);
+                                    if (rootData && rootData.editPost) {
+                                        setTimeout(() => window.initEditEditor(rootData.editPost.body), 50);
+                                    }
+                                }
+                            }
+                        }
+                    });
                 });
-            }
-        }))
-    })
-</script>
+
+                const editDialog = document.querySelector('[x-show="showEdit"]');
+                if (editDialog) {
+                    editObserver.observe(editDialog, {
+                        attributes: true
+                    });
+                    if (editDialog.style.display !== 'none') {
+                        const rootEl = document.querySelector('[x-data]');
+                        if (rootEl && window.Alpine) {
+                            const rootData = window.Alpine.$data(rootEl);
+                            if (rootData && rootData.editPost) {
+                                setTimeout(() => window.initEditEditor(rootData.editPost.body), 100);
+                            }
+                        }
+                    }
+                }
+            });
+        })();
+    </script>
+    @endpush
+</x-layouts.admin>
