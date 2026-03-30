@@ -237,7 +237,7 @@
                   <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300
                               bg-white/[0.03] border border-white/[0.05] group-hover:bg-white/[0.08] group-hover:border-white/[0.1]">
                     @if($skill->icon)
-                      <img src="https://cdn.simpleicons.org/{{ $skill->icon }}"
+                      <img src="https://cdn.simpleicons.org/{{ $skill->icon }}{{ in_array($skill->icon, ['elysia', 'nextjs', 'vscode']) ? '/ffffff' : '' }}"
                            alt="{{ $skill->name }}"
                            class="w-6 h-6 object-contain opacity-80 group-hover:opacity-100 transition-opacity"
                            loading="lazy" />

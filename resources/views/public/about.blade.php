@@ -97,7 +97,7 @@
 
                       @if($skill->icon)
                         <img
-                          src="https://cdn.simpleicons.org/{{ $skill->icon }}"
+                          src="https://cdn.simpleicons.org/{{ $skill->icon }}{{ in_array($skill->icon, ['elysia', 'nextjs', 'vscode']) ? '/ffffff' : '' }}"
                           alt="{{ $skill->name }}"
                           class="w-4 h-4 object-contain opacity-80"
                           onerror="this.style.display='none'"
