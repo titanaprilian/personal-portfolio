@@ -16,7 +16,6 @@ class SkillController extends Controller
     {
         $skills = Skill::query()
             ->with('skillCategory')
-            ->orderBy('order')
             ->orderBy('name')
             ->paginate(20);
 

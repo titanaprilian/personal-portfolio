@@ -18,7 +18,6 @@ class StoreSkillRequest extends FormRequest
             'skill_category_id' => ['required', 'exists:skill_categories,id'],
             'proficiency' => ['required', 'integer', 'min:0', 'max:100'],
             'icon' => ['nullable', 'string', 'max:100'],
-            'order' => ['required', 'integer', 'min:0'],
         ];
     }
 }

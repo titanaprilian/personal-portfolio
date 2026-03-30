@@ -15,14 +15,12 @@ class Skill extends Model
         'skill_category_id',
         'proficiency',
         'icon',
-        'order',
     ];
 
     protected function casts(): array
     {
         return [
             'proficiency' => 'integer',
-            'order' => 'integer',
         ];
     }
 
