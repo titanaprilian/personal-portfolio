@@ -22,6 +22,7 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
     <style>
+        [x-cloak] { display: none !important; }
         /* Editor container - highest priority */
         .EasyMDEContainer .editor-toolbar { 
             background-color: #1f2937 !important; 
