@@ -4,7 +4,7 @@
         showEdit: {{ $errors->any() && old('_form') === 'edit' ? 'true' : 'false' }},
         showDelete: false,
         editSkill: null,
-        editForm: { name: '', skill_category_id: '', proficiency: 80, icon: '', order: 0 },
+        editForm: { name: '', skill_category_id: '', proficiency: 80, icon: '' },
         deleteSkill: null,
         initEditForm() {
             if (this.editSkill) {
@@ -12,8 +12,7 @@
                     name: this.editSkill.name || '',
                     skill_category_id: this.editSkill.skill_category_id || '',
                     proficiency: this.editSkill.proficiency ?? 80,
-                    icon: this.editSkill.icon || '',
-                    order: this.editSkill.order ?? 0
+                    icon: this.editSkill.icon || ''
                 };
                 this.$nextTick(() => {
                     const pickerWrapper = this.$el.querySelector('.edit-icon-picker [x-data]');
@@ -50,7 +49,6 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Proficiency</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order</th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -85,7 +83,6 @@
                                         </span>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $skill->order }}</td>
                                 <td class="px-4 py-3 text-right">
                                     <button @click="showEdit = true; editSkill = {{ $skill->toJson() }}"
                                         class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium text-sm mr-3">
@@ -99,7 +96,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                                     No skills yet. Create your first skill!
                                 </td>
                             </tr>
@@ -214,17 +211,10 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm text-gray-700 dark:text-gray-300 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Icon <span class="text-gray-400 text-xs">(optional)</span>
                         </label>
                         <x-admin.icon-picker name="icon" value="{{ old('icon', '') }}" />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Order</label>
-                        <input type="number" name="order" value="{{ old('order', 0) }}" min="0"
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                        <p class="text-xs text-gray-400 mt-1">Lower numbers appear first.</p>
                     </div>
                 </div>
 
@@ -296,13 +286,6 @@
                             <div class="edit-icon-picker">
                                 <x-admin.icon-picker name="icon" value="" />
                             </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Order</label>
-                            <input type="number" name="order" x-model="editForm.order" min="0"
-                                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                            <p class="text-xs text-gray-400 mt-1">Lower numbers appear first.</p>
                         </div>
                     </div>
 
