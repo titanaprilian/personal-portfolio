@@ -33,7 +33,6 @@ class HomeController extends Controller
 
         $skills = Skill::query()
             ->with('skillCategory')
-            ->orderBy('order')
             ->orderBy('name')
             ->get()
             ->groupBy(fn ($skill) => $skill->skillCategory?->name ?? 'Uncategorized');
