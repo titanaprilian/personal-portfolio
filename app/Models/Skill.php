@@ -15,6 +15,7 @@ class Skill extends Model
         'skill_category_id',
         'proficiency',
         'icon',
+        'icon_color',
     ];
 
     protected function casts(): array
