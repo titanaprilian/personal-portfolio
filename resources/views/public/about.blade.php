@@ -97,7 +97,7 @@
 
                       @if($skill->icon)
                         <img
-                          src="https://cdn.simpleicons.org/{{ $skill->icon }}"
+                          src="https://cdn.simpleicons.org/{{ $skill->icon }}{{ $skill->icon_color ? '/' . ltrim(\App\Helpers\TailwindColors::getHex($skill->icon_color), '#') : '' }}"
                           alt="{{ $skill->name }}"
                           class="w-4 h-4 object-contain opacity-80"
                           onerror="this.style.display='none'"
