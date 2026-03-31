@@ -12,5 +12,6 @@ sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${DB_PASSWORD:-root}/" /var/www/.env
 php /var/www/artisan key:generate
 php /var/www/artisan config:clear
 php /var/www/artisan migrate --no-interaction
+php /var/www/artisan storage:link
 
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
