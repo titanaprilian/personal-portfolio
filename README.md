@@ -24,7 +24,7 @@ This is a full-stack personal portfolio web application serving as a project sho
 ## Features
 
 - **Project Showcase** — list of projects with detail pages, category/tag filtering, and a featured section that highlights up to 3 key projects
-- **Blog** — writing with rich text support (Quill.js), categories, tags, search, and reading time
+- **Blog** — writing with rich text support (EasyMDE), categories, tags, search, and reading time
 - **About & CV** — about page and downloadable resume PDF managed through the admin panel
 - **Contact Form** — public contact form with messages stored and viewable in the admin panel
 - **Admin Panel** — full CRUD for projects, blog posts, skills, experiences, contacts, and resume uploads; protected by authentication
@@ -41,7 +41,7 @@ This is a full-stack personal portfolio web application serving as a project sho
 | Framework        | Laravel 12                        |
 | Authentication   | Laravel Breeze 2                  |
 | Frontend         | Blade, Alpine.js, Tailwind CSS v4 |
-| Rich Text Editor | Quill.js                          |
+| Rich Text Editor | EasyMDE                         |
 | Build Tool       | Vite                              |
 | Testing          | PHPUnit 11                        |
 | Code Style       | Laravel Pint                      |
