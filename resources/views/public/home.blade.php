@@ -12,7 +12,7 @@
       </div>
     </div>
 
-    <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
+    <div class="absolute inset-0 opacity-[0.03] dark:opacity-[0.03] pointer-events-none"
          style="background-image:
                   linear-gradient(var(--color-neon) 1px, transparent 1px),
                   linear-gradient(90deg, var(--color-neon) 1px, transparent 1px);
@@ -31,8 +31,8 @@
 
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full
                         border mb-8"
-                 style="border-color: rgba(0,255,224,0.3);
-                        background: rgba(0,255,224,0.05);
+                 style="border-color: rgba(99,102,241,0.3);
+                        background: rgba(99,102,241,0.05);
                         animation: fadeSlideUp 0.4s ease both">
               <span class="w-2 h-2 rounded-full animate-pulse"
                     style="background: var(--color-neon)"></span>
@@ -42,7 +42,7 @@
               </span>
             </div>
 
-            <h1 class="font-display font-bold text-[--color-text] leading-[1.1] mb-6"
+            <h1 class="font-display font-bold text-gray-900 dark:text-gray-100 leading-[1.1] mb-6"
                 style="font-size: clamp(2.8rem, 7vw, 5.5rem);
                        animation: fadeSlideUp 0.5s ease 0.05s both">
               {{ config('app.name') }}
@@ -68,11 +68,11 @@
 
               <a href="{{ route('projects.index') }}"
                  class="inline-flex items-center gap-2 px-6 py-3 rounded-xl
-                        font-display text-sm font-bold tracking-wide
-                        transition-all duration-200"
+                       font-display text-sm font-bold tracking-wide
+                       transition-all duration-200"
                  style="background: var(--color-neon);
-                        color: var(--color-bg);
-                        box-shadow: 0 0 24px var(--color-neon-dim);"
+                       color: var(--color-bg);
+                       box-shadow: 0 0 24px var(--color-neon-dim);"
                  onmouseover="this.style.boxShadow='0 0 40px var(--color-neon-dim)'"
                  onmouseout="this.style.boxShadow='0 0 24px var(--color-neon-dim)'">
                 View Projects
@@ -85,10 +85,10 @@
 
               <a href="{{ route('contact') }}"
                  class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border
-                        font-display text-sm font-bold tracking-wide transition-all duration-200"
+                       font-display text-sm font-bold transition-all duration-200"
                  style="border-color: var(--color-border);
-                        color: var(--color-text);"
-                 onmouseover="this.style.borderColor='rgba(0,255,224,0.4)';
+                       color: var(--color-text);"
+                 onmouseover="this.style.borderColor='rgba(99,102,241,0.4)';
                               this.style.color='var(--color-neon)'"
                  onmouseout="this.style.borderColor='var(--color-border)';
                              this.style.color='var(--color-text)'">

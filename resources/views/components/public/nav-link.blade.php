@@ -6,10 +6,7 @@
 
 <a
     href="{{ $href }}"
-    class="text-xs tracking-widest uppercase font-medium transition-all duration-200 {{ $isActive ? 'text-[--color-neon] border-b border-[--color-neon]' : 'text-[--color-muted] hover:text-[--color-neon]' }}"
-    @if($isActive)
-        style="text-shadow: 0 0 10px rgba(0,255,224,0.5);"
-    @endif
+    class="text-xs tracking-widest uppercase font-medium transition-all duration-200 {{ $isActive ? 'text-indigo-600 dark:text-indigo-400 border-b border-indigo-600 dark:border-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400' }}"
 >
     {{ $label }}
 </a>

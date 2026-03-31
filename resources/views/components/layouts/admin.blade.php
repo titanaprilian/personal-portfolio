@@ -1,22 +1,27 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{
-    darkMode: localStorage.getItem('darkMode') === 'true',
-    sidebarOpen: false,
-    init() {
-        this.$watch('darkMode', val => {
-            localStorage.setItem('darkMode', val)
-            document.documentElement.classList.toggle('dark', val)
-        })
-        document.documentElement.classList.toggle('dark', this.darkMode)
-    }
-}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ sidebarOpen: false }">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <title>{{ config('app.name', 'Laravel') }}</title>
+
+    <script>
+        (function() {
+            const stored = localStorage.getItem('darkMode');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = stored === 'true' || (stored === null && prefersDark);
+            if (isDark) document.documentElement.classList.add('dark');
+            // Initialize store early
+            if (window.Alpine) {
+                Alpine.store('darkMode', {
+                    on: isDark,
+                    init() { document.documentElement.classList.toggle('dark', this.on); }
+                });
+            }
+        })();
+    </script>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />

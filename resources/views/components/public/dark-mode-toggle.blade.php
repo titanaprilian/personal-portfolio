@@ -1,7 +1,7 @@
 <button
     x-data
     @click="$store.darkMode.toggle()"
-    class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors"
+    class="rounded-lg p-2 text-gray-400 hover:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700 transition-colors"
 >
     <svg
         x-show="$store.darkMode.on"
