@@ -5,6 +5,9 @@
         showDelete: false,
         editExperience: null,
         deleteExperience: null,
+        submittingCreate: false,
+        submittingEdit: false,
+        submittingDelete: false,
     }">
 
         <div class="mb-6 flex items-center justify-between">
@@ -99,7 +102,7 @@
         </div>
 
         <x-admin.dialog :open="'showCreate'" title="Add Experience" :close="'showCreate = false'" max-width="max-w-lg">
-            <form method="POST" action="{{ route('admin.experiences.store') }}">
+            <form method="POST" action="{{ route('admin.experiences.store') }}" @submit="submittingCreate = true">
                 @csrf
                 <input type="hidden" name="_form" value="create" />
 
@@ -156,14 +159,23 @@
 
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button type="button" @click="showCreate = false" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors">Add Experience</button>
+                    <button type="submit" :disabled="submittingCreate" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 rounded-lg transition-colors disabled:cursor-not-allowed flex items-center gap-2">
+                        <span x-show="!submittingCreate">Add Experience</span>
+                        <span x-show="submittingCreate" class="flex items-center gap-2">
+                            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Adding...
+                        </span>
+                    </button>
                 </div>
             </form>
         </x-admin.dialog>
 
         <x-admin.dialog :open="'showEdit'" title="Edit Experience" :close="'showEdit = false; editExperience = null'" max-width="max-w-lg">
             <template x-if="editExperience !== null">
-                <form method="POST" :action="`{{ route('admin.experiences.index') }}/${editExperience.id}`">
+                <form method="POST" :action="`{{ route('admin.experiences.index') }}/${editExperience.id}`" @submit="submittingEdit = true">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="_form" value="edit" />
@@ -212,7 +224,16 @@
 
                     <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <button type="button" @click="showEdit = false; editExperience = null" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">Cancel</button>
-                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors">Save Changes</button>
+                        <button type="submit" :disabled="submittingEdit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 rounded-lg transition-colors disabled:cursor-not-allowed flex items-center gap-2">
+                            <span x-show="!submittingEdit">Save Changes</span>
+                            <span x-show="submittingEdit" class="flex items-center gap-2">
+                                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Saving...
+                            </span>
+                        </button>
                     </div>
                 </form>
             </template>
@@ -220,7 +241,7 @@
 
         <x-admin.dialog :open="'showDelete'" title="Delete Experience" :close="'showDelete = false'" max-width="max-w-md">
             <template x-if="deleteExperience !== null">
-                <form method="POST" :action="`{{ route('admin.experiences.index') }}/${deleteExperience.id}`">
+                <form method="POST" :action="`{{ route('admin.experiences.index') }}/${deleteExperience.id}`" @submit="submittingDelete = true">
                     @csrf
                     @method('DELETE')
                     <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -230,7 +251,16 @@
                     </p>
                     <div class="flex justify-end gap-3 mt-6">
                         <button type="button" @click="showDelete = false; deleteExperience = null" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">Cancel</button>
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm">Yes, Delete</button>
+                        <button type="submit" :disabled="submittingDelete" class="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-lg text-sm disabled:cursor-not-allowed flex items-center gap-2">
+                            <span x-show="!submittingDelete">Yes, Delete</span>
+                            <span x-show="submittingDelete" class="flex items-center gap-2">
+                                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Deleting...
+                            </span>
+                        </button>
                     </div>
                 </form>
             </template>
