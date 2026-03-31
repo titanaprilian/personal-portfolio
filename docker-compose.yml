@@ -34,6 +34,8 @@ services:
       MYSQL_DATABASE: laravel_portfolio
       MYSQL_USER: laravel
       MYSQL_PASSWORD: laravel
+    command:
+      - --default-authentication-plugin=mysql_native_password
     volumes:
       - db-data:/var/lib/mysql
     networks:
