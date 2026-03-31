@@ -7,6 +7,8 @@
         previewReady: false,
         uploadFile: null,
         uploadFileName: '',
+        submittingUpload: false,
+        submittingDelete: false,
     }">
         <div class="flex items-center justify-between mb-6">
             <div>
@@ -112,7 +114,7 @@
         @endforelse
 
         <x-admin.dialog :open="'showUpload'" title="Upload New Resume" :close="'showUpload = false; previewUrl = null; previewReady = false; uploadFileName = \'\''" max-width="max-w-2xl">
-            <form method="POST" action="{{ route('admin.resume.store') }}" enctype="multipart/form-data" x-data @submit.prevent="if (!uploadFile) { alert('Please select a PDF file.'); return; } $el.submit();">
+            <form method="POST" action="{{ route('admin.resume.store') }}" enctype="multipart/form-data" x-data @submit.prevent="if (!uploadFile) { alert('Please select a PDF file.'); return; } submittingUpload = true; $el.submit();">
                 @csrf
                 <div x-show="!previewUrl">
                     <div class="mb-4">
@@ -157,8 +159,26 @@
                 <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button type="button" @click="showUpload = false; previewUrl = null; previewReady = false; uploadFileName = ''" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Cancel</button>
                     <div class="flex gap-2">
-                        <button x-show="!previewUrl" type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors">Upload Resume</button>
-                        <button x-show="previewUrl" type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors">Confirm & Upload</button>
+                        <button x-show="!previewUrl" type="submit" :disabled="submittingUpload" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-sm font-medium transition-colors disabled:cursor-not-allowed flex items-center gap-2">
+                            <span x-show="!submittingUpload">Upload Resume</span>
+                            <span x-show="submittingUpload" class="flex items-center gap-2">
+                                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Uploading...
+                            </span>
+                        </button>
+                        <button x-show="previewUrl" type="submit" :disabled="submittingUpload" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-sm font-medium transition-colors disabled:cursor-not-allowed flex items-center gap-2">
+                            <span x-show="!submittingUpload">Confirm & Upload</span>
+                            <span x-show="submittingUpload" class="flex items-center gap-2">
+                                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Uploading...
+                            </span>
+                        </button>
                     </div>
                 </div>
             </form>
@@ -170,12 +190,21 @@
                 <span class="font-semibold text-gray-800 dark:text-gray-200" x-text="deleteResume?.label"></span>?
                 The PDF file will be removed from storage. This cannot be undone.
             </p>
-            <form method="POST" :action="`/admin/resume/${deleteResume?.id}`" class="mt-6">
+            <form method="POST" :action="`/admin/resume/${deleteResume?.id}`" class="mt-6" @submit="submittingDelete = true">
                 @csrf
                 @method('DELETE')
                 <div class="flex justify-end gap-3">
                     <button type="button" @click="showDelete = false; deleteResume = null" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Cancel</button>
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">Yes, Delete</button>
+                    <button type="submit" :disabled="submittingDelete" class="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-lg text-sm transition-colors disabled:cursor-not-allowed flex items-center gap-2">
+                        <span x-show="!submittingDelete">Yes, Delete</span>
+                        <span x-show="submittingDelete" class="flex items-center gap-2">
+                            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Deleting...
+                        </span>
+                    </button>
                 </div>
             </form>
         </x-admin.dialog>
