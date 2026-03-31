@@ -21,6 +21,9 @@
         showDelete: false,
         editPost: {{ $oldEditPost ? json_encode($oldEditPost) : 'null' }},
         deletePost: null,
+        submittingCreate: false,
+        submittingEdit: false,
+        submittingDelete: false,
     }">
         @if (session('success'))
             <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
@@ -129,7 +132,9 @@
                                         @submit.prevent="async (e) => {
                                             const form = e.target;
                                             const input = form.querySelector('input[name=order]');
+                                            const button = form.querySelector('button[type=submit]');
                                             const originalValue = input.value;
+                                            button.disabled = true;
                                             try {
                                                 const response = await fetch(form.action, {
                                                     method: 'POST',
@@ -146,15 +151,21 @@
                                                 }
                                             } catch (err) {
                                                 input.value = originalValue;
+                                            } finally {
+                                                button.disabled = false;
                                             }
                                         }">
                                         @csrf
                                         @method('PATCH')
                                         <input type="number" name="order" value="{{ $post->order }}" min="0"
                                             class="w-16 px-2 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500">
-                                        <button type="submit" class="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400" title="Update order">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <button type="submit" class="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed" title="Update order">
+                                            <svg x-show="!$el.disabled" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            <svg x-show="$el.disabled" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                             </svg>
                                         </button>
                                     </form>
@@ -252,7 +263,8 @@
         </div>
 
         <x-admin.dialog :open="'showCreate'" title="Add New Post" :close="'showCreate = false'" max-width="max-w-4xl">
-            <form method="POST" action="{{ route('admin.blog.store') }}" enctype="multipart/form-data" id="create-post-form">
+            <form method="POST" action="{{ route('admin.blog.store') }}" enctype="multipart/form-data" id="create-post-form"
+                @submit="submittingCreate = true">
                 @csrf
                 <input type="hidden" name="_form" value="create">
 
@@ -436,16 +448,25 @@
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button type="button" @click="showCreate = false"
                         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">Cancel</button>
-                    <button type="submit"
-                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">Create
-                        Post</button>
+                    <button type="submit" :disabled="submittingCreate"
+                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center gap-2">
+                        <span x-show="!submittingCreate">Create Post</span>
+                        <span x-show="submittingCreate" class="flex items-center gap-2">
+                            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Creating...
+                        </span>
+                    </button>
                 </div>
             </form>
         </x-admin.dialog>
 
         <x-admin.dialog :open="'showEdit'" title="Edit Post" :close="'showEdit = false; editPost = null'" max-width="max-w-4xl">
             <template x-if="editPost">
-                <form method="POST" :action="`/admin/blog/${editPost.id}`" enctype="multipart/form-data" id="edit-post-form">
+                <form method="POST" :action="`/admin/blog/${editPost.id}`" enctype="multipart/form-data" id="edit-post-form"
+                    @submit="submittingEdit = true">
                     @csrf
                     @method('PUT')
                     <input type="hidden" name="_form" value="edit">
@@ -626,9 +647,17 @@
                     <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <button type="button" @click="showEdit = false; editPost = null"
                             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">Cancel</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">Save
-                            Changes</button>
+                        <button type="submit" :disabled="submittingEdit"
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center gap-2">
+                            <span x-show="!submittingEdit">Save Changes</span>
+                            <span x-show="submittingEdit" class="flex items-center gap-2">
+                                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                                Saving...
+                            </span>
+                        </button>
                     </div>
                 </form>
             </template>
@@ -640,15 +669,24 @@
                 <span class="font-semibold text-gray-800 dark:text-gray-200" x-text="deletePost?.title"></span>?
                 This action cannot be undone.
             </p>
-            <form method="POST" :action="deletePost ? `/admin/blog/${deletePost.id}` : ''" class="mt-6">
+            <form method="POST" :action="deletePost ? `/admin/blog/${deletePost.id}` : ''" class="mt-6"
+                @submit="submittingDelete = true">
                 @csrf
                 @method('DELETE')
                 <div class="flex justify-end gap-3">
                     <button type="button" @click="showDelete = false; deletePost = null"
                         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">Cancel</button>
-                    <button type="submit"
-                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">Yes,
-                        Delete</button>
+                    <button type="submit" :disabled="submittingDelete"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center gap-2">
+                        <span x-show="!submittingDelete">Yes, Delete</span>
+                        <span x-show="submittingDelete" class="flex items-center gap-2">
+                            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Deleting...
+                        </span>
+                    </button>
                 </div>
             </form>
         </x-admin.dialog>
